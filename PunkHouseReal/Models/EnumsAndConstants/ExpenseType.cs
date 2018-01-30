@@ -9,6 +9,7 @@ namespace PunkHouseReal.Models.EnumsAndConstants
     {
         Rent,
         Bill,
-        Supply
+        Supply,
+        TestBaby
     }
 }
