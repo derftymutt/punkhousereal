@@ -2,46 +2,35 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using PunkHouseReal.Data;
 using PunkHouseReal.Models;
 
 namespace PunkHouseReal.Controllers
 {
-    [Produces("application/json")]
-    [Route("api/House")]
+    [Route("[controller]")]
     public class HouseController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public HouseController(ApplicationDbContext context)
+        public HouseController(UserManager<ApplicationUser> userManager)
         {
-            _context = context;
-
-            if (_context.Houses.Count() == 0)
-            {
-                _context.Houses.Add(new House()
-                {
-                    Address1 = "test Address1",
-                    Address2 = "test Address2",
-                    Zip = 90042,
-                    City = "Los Angeles",
-                    State = "CA",
-                    Name = "Strange View"
-                });
-
-                _context.SaveChanges();
-            }
+            _userManager = userManager;
         }
 
-        //[HttpGet, Authorize]
-        public IEnumerable<House> GetAll()
+        public IActionResult Index()
         {
-            //var currentUser = HttpContext.User;
+            return View();
+        }
 
-            return _context.Houses.ToList();
+        [Route("create")]
+        public IActionResult Create()
+        {
 
+            var userId = _userManager.GetUserId(HttpContext.User);
+            ItemViewModel<string> model = new ItemViewModel<string>();
+            model.Item = userId;
+            return View(model);
         }
     }
 }

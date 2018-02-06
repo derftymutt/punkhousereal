@@ -10,7 +10,7 @@ namespace PunkHouseReal.Models
     public class HouseMateExpense
     {
         [Key, Column(Order = 0)]
-        public int HouseMateId { get; set; }
+        public string HouseMateId { get; set; }
         public HouseMate HouseMate { get; set; }
 
         [Key, Column(Order = 1)]

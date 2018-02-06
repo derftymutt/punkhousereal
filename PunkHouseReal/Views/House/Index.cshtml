@@ -1,0 +1,79 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div ng-controller="houseListController as h">
+    <h1>Add or Join a house, punk!</h1>
+
+    <a href="/house/create" class="btn button">Add a house</a>
+
+    <div ng-repeat="house in h.houseList">
+        <p>{{house.city}} {{house.state}} -- <span>{{house.name}}, {{house.address1}}, {{house.zip}}</span> </p>
+        <button ng-click="h.onJoinHouseClick(house)">Join this house</button>
+        <hr />
+    </div>
+
+</div>
+
+@section Scripts {
+
+<script src="~/js/houseService.js"></script>
+<script src="~/js/houseMateService.js"></script>
+
+<script>
+    (function () {
+        "use strict";
+
+        angular.module("app").controller("houseListController", HouseListController);
+        HouseListController.$inject = ["houseService", "houseMateService"];
+
+        function HouseListController(houseService, houseMateService) {
+
+            var vm = this;
+            vm.houseService = houseService;
+            vm.houseMateService = houseMateService;
+
+            //initialize view template functions
+            vm.onJoinHouseClick = _onJoinHouseClick;
+
+            //on page load
+            render();
+            function render() {
+                houseService.get().then(_onGetHousesSuccess, _onGetHousesError);
+            }
+
+            // ------------ click handlers --------------------
+            function _onJoinHouseClick(house) {
+                console.log("im in the Join this house clickhandler");
+                vm.houseMateService.update(house.id).then(_onJoinHouseSuccess, _onJoinHouseError);
+
+            }
+
+            //----------------- ajax responses --------------------
+            function _onGetHousesSuccess(result) {
+                vm.houseList = result.data;
+                console.log(vm.houseList);
+            }
+
+            function _onGetHousesError() {
+                console.log("error getting houses");
+            }
+
+            function _onJoinHouseSuccess(result) {
+               // vm.houseList = result.data;
+                console.log(result);
+            }
+
+            function _onJoinHouseError() {
+                console.log("error getting houses");
+            }
+
+        }
+
+    }());
+</script>
+
+}

@@ -1,0 +1,88 @@
+﻿@model ItemViewModel<string>
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Create</h2>
+
+<div ng-controller="houseController as house">
+
+    <form name="house.createHouse" ng-submit="house.onCreateHouseSubmit()" novalidate>
+        <div class="form-group">
+            <label for="">House name:</label>
+            <input type="text" class="form-control" id="houseName" ng-maxlength="50" ng-model="house.data.name" required>
+        </div>
+        <div class="form-group">
+            <label for="">Address 1:</label>
+            <input type="text" class="form-control" id="houseAddress1" ng-maxlength="50" ng-model="house.data.address1">
+        </div>
+        <div class="form-group">
+            <label for="">Address 2:</label>
+            <input type="text" class="form-control" id="houseAddress2" ng-maxlength="50" ng-model="house.data.address2">
+        </div>
+        <div class="form-group">
+            <label for="">City:</label>
+            <input type="text" class="form-control" id="houseCity" ng-maxlength="50" ng-model="house.data.city">
+        </div>
+        <div class="form-group">
+            <label for="">State:</label>
+            <input type="text" class="form-control" id="houseName" ng-maxlength="2" ng-model="house.data.state">
+        </div>
+        <div class="form-group">
+            <label for="">Zip:</label>
+            <input type="text" class="form-control" id="houseZip" ng-maxlength="5" ng-model="house.data.zip">
+        </div>
+        <button type="submit" class="btn btn-success">{{house.submitForm}}</button>
+    </form>
+
+</div>
+
+@section scripts {
+
+    <script src="~/js/houseService.js"></script>
+
+    <script>
+    (function () {
+        "use strict";
+
+        angular.module("app").controller("houseController", HouseController);
+        HouseController.$inject = ['houseService'];
+
+        function HouseController(houseService) {
+
+            var vm = this;
+            vm.houseService = houseService;
+
+            //variables
+            vm.submitForm = "Submit";
+            vm.userId = '@Html.Raw(Model.Item)'
+
+            //initialize view template functions
+            vm.onCreateHouseSubmit = _onCreateHouseSubmit;
+
+            //-------------- click handlers -----------------
+            function _onCreateHouseSubmit() {
+                vm.data.creatorId = vm.userId;
+                console.log(vm.data);
+                vm.houseService.create(vm.data).then(_onCreateHouseSuccess, _onCreateHouseError)
+            }
+
+            //--------------- ajax responses -----------------
+            function _onCreateHouseSuccess(data) {
+                console.log(data);
+                vm.submitForm = "submitted baby";
+            }
+
+            function _onCreateHouseError() {
+                console.log("there was an error creating the house");
+            }
+
+        }
+
+    }());
+    </script>
+
+
+}

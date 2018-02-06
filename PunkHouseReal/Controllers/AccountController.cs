@@ -220,17 +220,17 @@ namespace PunkHouseReal.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                var result = await _userManager.CreateAsync(user, model.Password);
+                var houseMate = new HouseMate { UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName};
+                var result = await _userManager.CreateAsync(houseMate, model.Password);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(houseMate);
+                    var callbackUrl = Url.EmailConfirmationLink(houseMate.Id, code, Request.Scheme);
                     await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    await _signInManager.SignInAsync(houseMate, isPersistent: false);
                     _logger.LogInformation("User created a new account with password.");
                     return RedirectToLocal(returnUrl);
                 }

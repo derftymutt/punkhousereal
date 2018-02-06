@@ -14,7 +14,6 @@ namespace PunkHouseReal.Models
         public int CreatorId { get; set; }
         public string Name { get; set; }
         public ExpenseType ExpenseType { get; set; }
-        [MaxLength(200)]
         public string Description { get; set; }
         public decimal Total { get; set; }
         public DateTime DueDate { get; set; }

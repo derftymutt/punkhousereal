@@ -11,6 +11,10 @@ using Microsoft.Extensions.DependencyInjection;
 using PunkHouseReal.Data;
 using PunkHouseReal.Models;
 using PunkHouseReal.Services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using PunkHouseReal.Services.DataAccess.Interfaces;
+using PunkHouseReal.Services.DataAccess;
 
 namespace PunkHouseReal
 {
@@ -35,6 +39,8 @@ namespace PunkHouseReal
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddScoped<IHouseDataAccess, HouseDataAccess>();
+            services.AddScoped<IHouseMateDataAccess, HouseMateDataAccess>();
 
             services.AddMvc();
         }
