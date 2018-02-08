@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PunkHouseReal.Data;
 using PunkHouseReal.Models;
-using PunkHouseReal.Services.DataAccess;
-using PunkHouseReal.Services.DataAccess.Interfaces;
+using PunkHouseReal.Services;
 
 namespace PunkHouseReal.Controllers.Api
 {
@@ -19,33 +19,40 @@ namespace PunkHouseReal.Controllers.Api
         #region properties
 
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IHouseMateDataAccess _houseMateDataAccess;
+        private readonly IHouseMateService _houseMateService;
 
         #endregion
 
         #region constructors
 
-        public HouseMateApiController(UserManager<ApplicationUser> userManager, IHouseMateDataAccess houseMateDataAccess)
+        public HouseMateApiController(UserManager<ApplicationUser> userManager, IHouseMateService houseMateDataAccess)
         {
             _userManager = userManager;
-            _houseMateDataAccess = houseMateDataAccess;
+            _houseMateService = houseMateDataAccess;
         }
 
         #endregion
 
         #region public methods
 
+        [HttpGet]
+        [Authorize]
+        public IActionResult GetHouseMate()
+        {
+            return Ok(GetCurrentHouseMate());
+        }
+
         [HttpPut, Route("{houseId:int}")]
+        [Authorize]
         public async Task<IActionResult> UpdateHouseMate(int houseId)
         {
             try
             {
-                //get current user
-                var currentUserId = _userManager.GetUserId(HttpContext.User);
-                HouseMate houseMate = _houseMateDataAccess.GetHouseMate(currentUserId);
+                //get current user var currentUserId = _userManager.GetUserId(HttpContext.User);
+                HouseMate houseMate = GetCurrentHouseMate();
 
                 //update houseMates HouseId
-                await _houseMateDataAccess.UpdateHouseId(houseMate, houseId);
+                await _houseMateService.UpdateHouseId(houseMate, houseId);
 
                 return Ok(houseMate);
 
@@ -55,6 +62,12 @@ namespace PunkHouseReal.Controllers.Api
                 throw;
             }
 
+        }
+
+        private HouseMate GetCurrentHouseMate()
+        {
+            var currentUserId = _userManager.GetUserId(HttpContext.User);
+            return _houseMateService.GetHouseMate(currentUserId);
         }
 
         #endregion

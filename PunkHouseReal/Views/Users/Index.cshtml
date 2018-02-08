@@ -1,0 +1,66 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div ng-controller="meController as me">
+
+    <h1>My House is called: {{me.house.name}}</h1>
+
+    <h3>My Housemates are:</h3>
+    <div ng-repeat="hm in me.houseMates">
+        <p>{{hm.firstName}} {{hm.lastName}}. houseId = {{hm.houseId}}</p>
+    </div>
+
+</div>
+
+@section Scripts { 
+
+<script src="~/js/houseService.js"></script>
+<script src="~/js/houseMateService.js"></script>
+
+<script>
+    (function () {
+        "use strict";
+
+        angular.module("app").controller("meController", MeController);
+        //inject
+        MeController.$inject = ["houseService", "houseMateService"];
+
+        function MeController(houseService, houseMateService) {
+
+            var vm = this;
+            vm.houseService = houseService;
+            vm.houseMateService = houseMateService;
+            vm.test = "test";
+            vm.houseId = '@Html.Raw(Model.Item)';
+
+            render();
+            function render() {
+                console.log(vm.houseId);
+                vm.houseService.get(vm.houseId).then(_onGetHouseSuccess, _onGetHouseError);
+
+            }
+
+            function _onGetHouseSuccess(data) {
+                console.log("house success below");
+                console.log(data);
+
+                vm.house = data.data;
+                vm.houseMates = data.data.houseMates;
+
+
+
+            }
+
+            function _onGetHouseError() {
+                console.log("error getting house");
+
+            }
+
+        }
+
+     }());
+</script>
+}

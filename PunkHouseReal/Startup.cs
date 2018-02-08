@@ -13,8 +13,7 @@ using PunkHouseReal.Models;
 using PunkHouseReal.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using PunkHouseReal.Services.DataAccess.Interfaces;
-using PunkHouseReal.Services.DataAccess;
+
 
 namespace PunkHouseReal
 {
@@ -39,8 +38,9 @@ namespace PunkHouseReal
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
-            services.AddScoped<IHouseDataAccess, HouseDataAccess>();
-            services.AddScoped<IHouseMateDataAccess, HouseMateDataAccess>();
+            services.AddScoped<IHouseService, HouseService>();
+            services.AddScoped<IHouseMateService, HouseMateService>();
+            services.AddScoped<IExpenseService, ExpenseService>();
 
             services.AddMvc();
         }

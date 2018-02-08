@@ -9,6 +9,10 @@
 
         var service = this;
 
+        service.getHouseMate = function () {
+            return $http.get('/api/housemate');
+        }
+
         service.update = function (houseId) {
             return $http.put('/api/housemate/' + houseId);
         };

@@ -42,7 +42,7 @@
             //on page load
             render();
             function render() {
-                houseService.get().then(_onGetHousesSuccess, _onGetHousesError);
+                houseService.getAll().then(_onGetHousesSuccess, _onGetHousesError);
             }
 
             // ------------ click handlers --------------------

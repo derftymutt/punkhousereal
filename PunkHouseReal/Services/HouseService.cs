@@ -1,14 +1,14 @@
-﻿using PunkHouseReal.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using PunkHouseReal.Data;
 using PunkHouseReal.Models;
-using PunkHouseReal.Services.DataAccess.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PunkHouseReal.Services.DataAccess
+namespace PunkHouseReal.Services
 {
-    public class HouseDataAccess : IHouseDataAccess
+    public class HouseService : IHouseService
     {
         #region properties
 
@@ -18,7 +18,7 @@ namespace PunkHouseReal.Services.DataAccess
 
         #region constructors
 
-        public HouseDataAccess(ApplicationDbContext database)
+        public HouseService(ApplicationDbContext database)
         {
             _database = database;
         }
@@ -49,6 +49,11 @@ namespace PunkHouseReal.Services.DataAccess
         public List<House> GetAll()
         {
             return _database.Houses.ToList();
+        }
+
+        public House GetHouse(int houseId)
+        {
+            return _database.Houses.Include(house => house.HouseMates).First(house => house.Id == houseId);
         }
 
         public House AddHouse(House house)

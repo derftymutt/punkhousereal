@@ -10,8 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using PunkHouseReal.Data;
 using PunkHouseReal.Models;
 using PunkHouseReal.Models.BindingModels;
-using PunkHouseReal.Services.DataAccess;
-using PunkHouseReal.Services.DataAccess.Interfaces;
+using PunkHouseReal.Services;
 
 namespace PunkHouseReal.Controllers
 {
@@ -21,19 +20,19 @@ namespace PunkHouseReal.Controllers
     {
         #region properties
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IHouseDataAccess _houseDataAccess;
-        private readonly IHouseMateDataAccess _houseMateDataAccess;
+        private readonly IHouseService _houseService;
+        private readonly IHouseMateService _houseMateService;
         
         #endregion
 
         #region constructors
-        public HouseApiController(UserManager<ApplicationUser> userManager, IHouseDataAccess houseDataAccess, IHouseMateDataAccess houseMateDataAccess)
+        public HouseApiController(UserManager<ApplicationUser> userManager, IHouseService houseDataAccess, IHouseMateService houseMateDataAccess)
         {
             _userManager = userManager;
-            _houseDataAccess = houseDataAccess;
-            _houseMateDataAccess = houseMateDataAccess;
+            _houseService = houseDataAccess;
+            _houseMateService = houseMateDataAccess;
 
-            _houseDataAccess.Initialize();
+            _houseService.Initialize();
             
         }
         #endregion
@@ -46,7 +45,21 @@ namespace PunkHouseReal.Controllers
         [HttpGet]
         public IEnumerable<House> GetHouses()
         {
-            return _houseDataAccess.GetAll();
+            return _houseService.GetAll();
+        }
+
+        [HttpGet, Route("{houseId:int}")]
+        [Authorize]
+        public IActionResult GetHouse([FromRoute]int houseId)
+        {
+            //get current user
+            var currentUserId = _userManager.GetUserId(HttpContext.User);
+            HouseMate currentUser = _houseMateService.GetHouseMate(currentUserId);
+            if (houseId != currentUser.HouseId)
+                return BadRequest("Housemate's houseId does not match");
+
+            House house = _houseService.GetHouse(houseId);
+            return Ok(house);
         }
 
         /// <summary>
@@ -62,9 +75,8 @@ namespace PunkHouseReal.Controllers
             {
                 try
                 {
-                    //get current user
-                   // var currentUserId = _userManager.GetUserId(HttpContext.User);
-                    var houseMate = _houseMateDataAccess.GetHouseMate(model.CreatorId);
+                   
+                    var houseMate = _houseMateService.GetHouseMate(model.CreatorId);
 
                     if (houseMate.HouseId != 0)
                     {
@@ -74,10 +86,10 @@ namespace PunkHouseReal.Controllers
                     //first add house to db
                     House house = new House();
                     ParseHouseFields(house, model);
-                    House houseAdded = _houseDataAccess.AddHouse(house);
+                    House houseAdded = _houseService.AddHouse(house);
 
                     //Add houseId to houseMate in db
-                    await _houseMateDataAccess.UpdateHouseId(houseMate, houseAdded.Id);
+                    await _houseMateService.UpdateHouseId(houseMate, houseAdded.Id);
 
                     return Ok(houseAdded);
 
@@ -91,6 +103,7 @@ namespace PunkHouseReal.Controllers
 
             return BadRequest("Shitty request");
         }
+
         #endregion
 
         #region private helper methods

@@ -1,20 +1,20 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using PunkHouseReal.Data;
 using PunkHouseReal.Models;
-using PunkHouseReal.Services.DataAccess.Interfaces;
+using PunkHouseReal.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PunkHouseReal.Services.DataAccess
+namespace PunkHouseReal.Services
 {
-    public class HouseMateDataAccess : IHouseMateDataAccess
+    public class HouseMateService : IHouseMateService
     {
         private readonly ApplicationDbContext _database;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public HouseMateDataAccess(ApplicationDbContext database, UserManager<ApplicationUser> userManager)
+        public HouseMateService(ApplicationDbContext database, UserManager<ApplicationUser> userManager)
         {
             _database = database;
             _userManager = userManager;

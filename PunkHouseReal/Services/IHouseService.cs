@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using PunkHouseReal.Models;
 
-namespace PunkHouseReal.Services.DataAccess.Interfaces
+namespace PunkHouseReal.Services
 {
-    public interface IHouseDataAccess
+    public interface IHouseService
     {
         House AddHouse(House house);
         List<House> GetAll();
+        House GetHouse(int houseId);
         void Initialize();
     }
 }

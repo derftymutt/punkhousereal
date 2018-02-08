@@ -13,9 +13,13 @@
             return $http.post('/api/house', data);
         };
 
-        service.get = function () {
+        service.getAll = function () {
             return $http.get('/api/house');
         };
+
+        service.get = function (houseId) {
+            return $http.get('/api/house/' + houseId);
+        }
 
         return service;
     }
