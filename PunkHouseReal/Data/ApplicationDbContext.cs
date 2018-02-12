@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using PunkHouseReal.Domain;
 //using PunkHouseReal.Domain;
 using PunkHouseReal.Models;
 
@@ -30,6 +31,9 @@ namespace PunkHouseReal.Data
 
             builder.Entity<House>()
                 .HasMany(a => a.HouseMates);
+
+            builder.Entity<Expense>()
+                .HasOne(e => e.House);
 
             builder.Entity<HouseMateExpense>()
                 .HasKey(hme => new { hme.HouseMateId, hme.ExpenseId });

@@ -12,7 +12,7 @@ namespace PunkHouseReal.Models.BindingModels
         [Required]
         public int HouseId { get; set; }
         [Required]
-        public int CreatorId { get; set; }
+        public string CreatorId { get; set; }
         [Required, MaxLength(30)]
         public string Name { get; set; }
         [Required]

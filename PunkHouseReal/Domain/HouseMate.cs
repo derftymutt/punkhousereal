@@ -1,15 +1,17 @@
-﻿using System;
+﻿using PunkHouseReal.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PunkHouseReal.Models
+namespace PunkHouseReal.Domain
 {
     public class HouseMate : ApplicationUser
     {
-        [ForeignKey("HouseId")]
-        public int HouseId { get; set; }
+        public int? HouseId { get; set; }
+        public House House { get; set; }
+
         public DateTimeOffset DateModified { get; set; }
 
         public ICollection<HouseMateExpense> HouseMateExpenses { get; set; }

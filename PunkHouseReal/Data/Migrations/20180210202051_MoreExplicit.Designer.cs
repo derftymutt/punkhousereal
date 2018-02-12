@@ -13,9 +13,10 @@ using System;
 namespace PunkHouseReal.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180210202051_MoreExplicit")]
+    partial class MoreExplicit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -277,7 +278,7 @@ namespace PunkHouseReal.Data.Migrations
 
                     b.Property<DateTimeOffset>("DateModified");
 
-                    b.Property<int?>("HouseId");
+                    b.Property<int>("HouseId");
 
                     b.HasIndex("HouseId");
 
@@ -360,7 +361,8 @@ namespace PunkHouseReal.Data.Migrations
                 {
                     b.HasOne("PunkHouseReal.Models.House", "House")
                         .WithMany("HouseMates")
-                        .HasForeignKey("HouseId");
+                        .HasForeignKey("HouseId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

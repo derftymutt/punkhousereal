@@ -1,11 +1,12 @@
-﻿using System;
+﻿using PunkHouseReal.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PunkHouseReal.Models
+namespace PunkHouseReal.Domain
 {
     public class HouseMateExpense
     {
@@ -19,5 +20,10 @@ namespace PunkHouseReal.Models
 
         public decimal Total { get; set; }
         public bool IsPaid { get; set; }
+
+        public HouseMateExpense()
+        {
+            IsPaid = false;
+        }
     }
 }

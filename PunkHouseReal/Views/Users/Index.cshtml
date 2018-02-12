@@ -1,4 +1,5 @@
-﻿
+﻿@model PunkHouseReal.Models.ItemViewModel<PunkHouseReal.Domain.HouseMate>;
+
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -6,12 +7,51 @@
 
 <div ng-controller="meController as me">
 
-    <h1>My House is called: {{me.house.name}}</h1>
+    <h1>Hello {{me.user.firstName}} {{me.user.lastName}} of {{me.house.name}}</h1>
 
     <h3>My Housemates are:</h3>
     <div ng-repeat="hm in me.houseMates">
         <p>{{hm.firstName}} {{hm.lastName}}. houseId = {{hm.houseId}}</p>
     </div>
+
+    <h4>House Expenses</h4>
+    <br />
+    <div ng-repeat="expense in me.houseExpenses">
+        <p>{{expense.name}} : {{expense.description}}</p>
+        <p>{{expense.price}}</p>
+        <p>{{expense.dueDate | date}}. Has everyone paid? - {{expense.isPaid}}</p>
+    </div>
+    <div>
+        <button class="btn btn-success" ng-click="me.onMyExpensesClick()">See my Expenses</button>
+        <div ng-repeat="expense in me.myExpenses">
+            <p>{{hm.firstName}} {{hm.lastName}}. houseId = {{hm.houseId}}</p>
+        </div>
+    </div>
+
+    <form name="house.createHouse" ng-submit="me.onCreateExpense()" novalidate>
+        <div class="form-group">
+            <label for="">Expense name:</label>
+            <input type="text" class="form-control" id="expenseName" ng-maxlength="30" ng-model="me.expenseData.name" required>
+        </div>
+        <div class="form-group">
+            <label for="">Type:</label>
+            <select ng-model="me.expenseData.expenseType" ng-options="type for type in me.expenseTypes" required></select>
+        </div>
+        <div class="form-group">
+            <label for="">Description:</label>
+            <input type="text" class="form-control" id="expenseDescription" ng-maxlength="50" ng-model="me.expenseData.description">
+        </div>
+        <div class="form-group">
+            <label for="">Total:</label>
+            <input type="text" class="form-control" id="expenseTotal" ng-model="me.expenseData.total" required>
+        </div>
+        <div class="form-group">
+            <label for="">Due Date:</label>
+            <input type="date" class="form-control" id="expenseDueDate" ng-model="me.expenseData.dueDate">
+        </div>
+
+        <button type="submit" class="btn btn-success">{{me.submitExpense}}</button>
+    </form>
 
 </div>
 
@@ -19,6 +59,7 @@
 
 <script src="~/js/houseService.js"></script>
 <script src="~/js/houseMateService.js"></script>
+<script src="~/js/expenseService.js"></script>
 
 <script>
     (function () {
@@ -26,36 +67,74 @@
 
         angular.module("app").controller("meController", MeController);
         //inject
-        MeController.$inject = ["houseService", "houseMateService"];
+        MeController.$inject = ["houseService", "houseMateService", "expenseService"];
 
-        function MeController(houseService, houseMateService) {
+        function MeController(houseService, houseMateService, expenseService) {
 
             var vm = this;
             vm.houseService = houseService;
             vm.houseMateService = houseMateService;
-            vm.test = "test";
-            vm.houseId = '@Html.Raw(Model.Item)';
+            vm.expenseService = expenseService;
+
+            vm.user = @Json.Serialize(Model.Item);
+            vm.expenseTypes = ["Rent", "Bill", "Supply", "Other"];
+            vm.submitExpense = "Submit";
+
+            vm.onCreateExpense = _onCreateExpense;
+            vm.onMyExpensesClick = _onMyExpensesClick;
+
 
             render();
             function render() {
-                console.log(vm.houseId);
-                vm.houseService.get(vm.houseId).then(_onGetHouseSuccess, _onGetHouseError);
+                console.log(vm.user);
+                vm.houseService.get(vm.user.houseId).then(_onGetHouseSuccess, _onGetHouseError);
+                vm.expenseService.getByHouseId(vm.user.houseId).then(_onGetHouseExpensesSuccess, _onGetHouseExpensesError);
+            }
+
+            function _onCreateExpense() {
+                vm.expenseData.creatorId = vm.user.id;
+                vm.expenseData.houseId = vm.user.houseId;
+                vm.expenseService.create(vm.expenseData).then(_onCreateExpenseSuccess, _onCreateExpenseError);
 
             }
 
+            function _onMyExpensesClick() {
+                vm.expenseService.getByHouseMateId(vm.user.id).then(_onGetMyExpensesSuccess, _onGetMyExpensesError);
+            }
+
+            //------------------ Ajax responses ----------------------
             function _onGetHouseSuccess(data) {
                 console.log("house success below");
                 console.log(data);
-
                 vm.house = data.data;
                 vm.houseMates = data.data.houseMates;
-
-
-
             }
 
             function _onGetHouseError() {
                 console.log("error getting house");
+            }
+
+            function _onCreateExpenseSuccess(response) {
+                console.log("Success adding expense!");
+                console.log(response);
+            }
+
+            function _onCreateExpenseError() {
+                console.log("Error creating expense");
+
+            }
+
+            function _onGetHouseExpensesSuccess(response) {
+                console.log("response below");
+                console.log(response);
+                vm.houseExpenses = response.data;
+                console.log("vm.houseExpenses below");
+                console.log(vm.houseExpenses);
+
+            }
+
+            function _onGetHouseExpensesError() {
+                console.log("error");
 
             }
 

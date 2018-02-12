@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using PunkHouseReal.Domain;
 using PunkHouseReal.Models;
 using PunkHouseReal.Services;
 
@@ -26,8 +27,8 @@ namespace PunkHouseReal.Controllers
         {
             var signedInUserId = _userManager.GetUserId(HttpContext.User);
             var user = _houseMateService.GetHouseMate(signedInUserId);
-            ItemViewModel<int> model = new ItemViewModel<int>();
-            model.Item = user.HouseId;
+            ItemViewModel<HouseMate> model = new ItemViewModel<HouseMate>();
+            model.Item = user;
             return View(model);
         }
     }

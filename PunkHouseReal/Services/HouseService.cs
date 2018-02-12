@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PunkHouseReal.Data;
+using PunkHouseReal.Domain;
 using PunkHouseReal.Models;
 using System;
 using System.Collections.Generic;

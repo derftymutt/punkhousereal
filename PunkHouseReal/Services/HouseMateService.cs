@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using PunkHouseReal.Data;
+using PunkHouseReal.Domain;
 using PunkHouseReal.Models;
 using PunkHouseReal.Services;
 using System;

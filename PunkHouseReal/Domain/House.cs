@@ -1,10 +1,11 @@
-﻿using System;
+﻿using PunkHouseReal.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PunkHouseReal.Models
+namespace PunkHouseReal.Domain
 {
     public class House
     {
@@ -17,6 +18,7 @@ namespace PunkHouseReal.Models
         public string City { get; set; }
         public string State { get; set; }
         public ICollection<HouseMate> HouseMates { get; set; }
+        public ICollection<Expense> Expenses { get; set; }
         public DateTimeOffset DateModified { get; set; }
         public DateTimeOffset DateCreated { get; set; }
 
