@@ -17,6 +17,8 @@ namespace PunkHouseReal.Models.BindingModels
         public string Name { get; set; }
         [Required]
         public ExpenseType ExpenseType { get; set; }
+        public bool IsDividedUnevenly { get; set; }
+        public Dictionary<string, decimal> UnevenTotals { get; set; }
         public string Description { get; set; }
         [Required]
         public decimal Total { get; set; }

@@ -13,9 +13,10 @@ using System;
 namespace PunkHouseReal.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180213022934_Add_IsDividedEvenly")]
+    partial class Add_IsDividedEvenly
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -149,7 +150,7 @@ namespace PunkHouseReal.Data.Migrations
 
                     b.Property<int>("HouseId");
 
-                    b.Property<bool>("IsDividedUnevenly");
+                    b.Property<bool>("IsDividedEvenly");
 
                     b.Property<bool>("IsPaid");
 

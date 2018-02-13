@@ -78,6 +78,8 @@ namespace PunkHouseReal.Controllers.Api
             expense.HouseId = model.HouseId;
             expense.Total = model.Total;
             expense.DueDate = model.DueDate;
+            expense.IsDividedUnevenly = model.IsDividedUnevenly;
+            expense.UnevenTotals = model.UnevenTotals;
         }
     }
 

@@ -11,20 +11,26 @@
 
     <h3>My Housemates are:</h3>
     <div ng-repeat="hm in me.houseMates">
-        <p>{{hm.firstName}} {{hm.lastName}}. houseId = {{hm.houseId}}</p>
+        <p>{{hm.firstName}} {{hm.lastName}}</p>
     </div>
+    <hr />
 
     <h4>House Expenses</h4>
-    <br />
     <div ng-repeat="expense in me.houseExpenses">
-        <p>{{expense.name}} : {{expense.description}}</p>
-        <p>{{expense.price}}</p>
-        <p>{{expense.dueDate | date}}. Has everyone paid? - {{expense.isPaid}}</p>
+        <p> {{$index + 1}}. <b>{{expense.houseMate.firstName}}</b> added: {{expense.name}}: {{expense.description}}. </p>
+        <p>Total: {{expense.total | currency}}, Due: {{expense.dueDate | date}}. Has everyone paid? - {{expense.isPaid}} </p>
+
     </div>
+    <hr />
+    <h4>My Expenses</h4>
     <div>
         <button class="btn btn-success" ng-click="me.onMyExpensesClick()">See my Expenses</button>
-        <div ng-repeat="expense in me.myExpenses">
-            <p>{{hm.firstName}} {{hm.lastName}}. houseId = {{hm.houseId}}</p>
+        <div>
+            <ol>
+                <li ng-repeat="expense in me.myExpenses">
+                {{expense.name}}: {{expense.total | currency}}, Due: {{expense.dueDate | date}}
+                </li>
+            </ol>
         </div>
     </div>
 
@@ -45,6 +51,16 @@
             <label for="">Total:</label>
             <input type="text" class="form-control" id="expenseTotal" ng-model="me.expenseData.total" required>
         </div>
+        <div class="form-group">
+            <input type="checkbox" id="expenseDivideCheckbox" ng-model="me.expenseData.isDividedUnevenly">
+            <label for="">Divide payment unevenly amongst housemates?</label>
+        </div>
+
+        <div class="form-group" ng-show="me.expenseData.isDividedUnevenly" ng-repeat="hm in me.houseMates">
+            <label for="">{{hm.firstName}}</label>
+            <input type="text" class="form-control" ng-model="me.unevenTotals[hm.id]">
+        </div>
+
         <div class="form-group">
             <label for="">Due Date:</label>
             <input type="date" class="form-control" id="expenseDueDate" ng-model="me.expenseData.dueDate">
@@ -79,6 +95,8 @@
             vm.user = @Json.Serialize(Model.Item);
             vm.expenseTypes = ["Rent", "Bill", "Supply", "Other"];
             vm.submitExpense = "Submit";
+            vm.isDividedUnevenly = false;
+            vm.unevenTotals = {};
 
             vm.onCreateExpense = _onCreateExpense;
             vm.onMyExpensesClick = _onMyExpensesClick;
@@ -92,14 +110,44 @@
             }
 
             function _onCreateExpense() {
+                console.log(vm.unevenTotals);
+                if (!isCorrectSum(vm.expenseData.total, vm.unevenTotals)) 
+                    return;
+                //build data object
                 vm.expenseData.creatorId = vm.user.id;
                 vm.expenseData.houseId = vm.user.houseId;
-                vm.expenseService.create(vm.expenseData).then(_onCreateExpenseSuccess, _onCreateExpenseError);
+                vm.expenseData.unevenTotals = vm.unevenTotals;
 
+                vm.expenseService.create(vm.expenseData).then(_onCreateExpenseSuccess, _onCreateExpenseError);
             }
 
             function _onMyExpensesClick() {
-                vm.expenseService.getByHouseMateId(vm.user.id).then(_onGetMyExpensesSuccess, _onGetMyExpensesError);
+                vm.myExpenses = [];
+                for (var i = 0; i < vm.houseExpenses.length; i++) {
+                    var expense = vm.houseExpenses[i];
+                    for (var y = 0; y < expense.houseMateExpenses.length; y++) {
+                        var houseMateExpense = expense.houseMateExpenses[y];
+                        if (houseMateExpense.houseMateId == vm.user.id) {
+                            houseMateExpense.creatorId = expense.creatorId;
+                            houseMateExpense.name = expense.name;
+                            houseMateExpense.dueDate = expense.dueDate;
+                            houseMateExpense.expenseType = expense.expenseType;
+                            vm.myExpenses.push(houseMateExpense);
+                        }
+                    }
+                }
+
+                console.log(vm.myExpenses);
+            }
+
+            function isCorrectSum(total, individualTotalsObj) {
+                var sum = 0;
+                for (var key in individualTotalsObj) {
+                    var value = individualTotalsObj[key]; 
+                    var valueAsInt = parseInt(value)
+                    sum += valueAsInt;
+                }
+                return total == sum;
             }
 
             //------------------ Ajax responses ----------------------

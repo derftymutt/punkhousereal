@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PunkHouseReal.Data;
 using PunkHouseReal.Domain;
 using PunkHouseReal.Models;
+using PunkHouseReal.Models.EnumsAndConstants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,12 +34,7 @@ namespace PunkHouseReal.Services
 
         public void AddExpense(Expense expense)
         {
-            //Check here against PaynemtType enum to determine how to proceed? or in controller...?
-            //Or in BuildHouseMateExpenses method?
-
-            //for now, assume Divide evenly...
             var houseMateExpenses = BuildHouseMateExpenses(expense);
-
             _database.HouseMateExpenses.AddRange(houseMateExpenses);
             _database.SaveChanges();
         }
@@ -46,7 +42,8 @@ namespace PunkHouseReal.Services
         public List<Expense> GetByHouseId(int houseId)
         {
             return _database.Expenses.Include(hme => hme.HouseMateExpenses)
-                                     .Where(hme => hme.HouseMate.HouseId == houseId)                                            
+                                     .Include(hm => hm.HouseMate)
+                                     .Where(hme => hme.HouseMate.HouseId == houseId)
                                      .ToList();
         }
 
@@ -57,31 +54,47 @@ namespace PunkHouseReal.Services
         private List<HouseMateExpense> BuildHouseMateExpenses(Expense expense)
         {
             var result = new List<HouseMateExpense>();
+            List<string> houseMateIds = new List<string>();
 
-            //Build PaymentType.DivideEvenly 
-            var houseMateIds = _database.HouseMates.Where(hm => hm.HouseId == expense.HouseId)
-                                                   .Select(hm => hm.Id)
-                                                   .ToList();
-
-            var totalEachEven = CalculateHouseMateExpenseDivideEvenlyTotal(expense.Total, expense.HouseId);
-
-            foreach (var id in houseMateIds)
+            if (expense.IsDividedUnevenly)
             {
-                var houseMateExpense = new HouseMateExpense()
+                foreach (var item in expense.UnevenTotals)
                 {
-                    Expense = expense,
-                    HouseMateId = id,
-                    Total = totalEachEven
-                };
+                    var houseMateExpense = new HouseMateExpense()
+                    {
+                        Expense = expense,
+                        HouseMateId = item.Key,
+                        Total = item.Value
+                    };
 
-                result.Add(houseMateExpense);
+                    result.Add(houseMateExpense);
+                }               
+            }
+            else
+            {
+                houseMateIds = _database.HouseMates.Where(hm => hm.HouseId == expense.HouseId)
+                                                       .Select(hm => hm.Id)
+                                                       .ToList();
+
+                var total = CalculateEvenTotal(expense.Total, expense.HouseId);
+
+                foreach (var id in houseMateIds)
+                {
+                    var houseMateExpense = new HouseMateExpense()
+                    {
+                        Expense = expense,
+                        HouseMateId = id,
+                        Total = total
+                    };
+
+                    result.Add(houseMateExpense);
+                }
             }
 
             return result;
-
         }
 
-        private decimal CalculateHouseMateExpenseDivideEvenlyTotal(decimal expenseTotal, int houseId)
+        private decimal CalculateEvenTotal(decimal expenseTotal, int houseId)
         {
             var houseMateCount = _database.HouseMates.Where(hm => hm.HouseId == houseId).Count();
             return expenseTotal / houseMateCount;
