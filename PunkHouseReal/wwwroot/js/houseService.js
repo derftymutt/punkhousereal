@@ -10,15 +10,19 @@
         var service = this;
 
         service.create = function (data) {
-            return $http.post('/api/house', data);
+            return $http.post('/api/houses', data);
         };
 
         service.getAll = function () {
-            return $http.get('/api/house');
+            return $http.get('/api/houses');
         };
 
         service.get = function (houseId) {
-            return $http.get('/api/house/' + houseId);
+            return $http.get('/api/houses/' + houseId);
+        }
+
+        service.getExpenses = function (houseId) {
+            return $http.get('/api/houses/' + houseId + '/expenses');
         }
 
         return service;

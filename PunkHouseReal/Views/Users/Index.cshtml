@@ -17,7 +17,7 @@
 
     <h4>House Expenses</h4>
     <div ng-repeat="expense in me.houseExpenses">
-        <p> {{$index + 1}}. <b>{{expense.houseMate.firstName}}</b> added: {{expense.name}}: {{expense.description}}. </p>
+        <p> {{$index + 1}}. <b>{{expense.houseMate.firstName}}</b> added: {{expense.name}}: {{expense.description}}. Added: {{expense.dateCreated | date}}</p>
         <p>Total: {{expense.total | currency}}, Due: {{expense.dueDate | date}}. Has everyone paid? - {{expense.isPaid}} </p>
 
     </div>
@@ -28,7 +28,10 @@
         <div>
             <ol>
                 <li ng-repeat="expense in me.myExpenses">
-                {{expense.name}}: {{expense.total | currency}}, Due: {{expense.dueDate | date}}
+                {{expense.name}}: {{expense.total | currency}}, Due: {{expense.dueDate | date}} <span ng-show="expense.isMarkedPaid">--- <i>marked paid... awaiting received payment confirmation</i> :)</span>
+                    <div ng-show="!expense.isMarkedPaid">
+                        <button class="btn btn-warning" ng-click="me.onMarkPaidClick(expense)">mark paid?</button>
+                    </div>
                 </li>
             </ol>
         </div>
@@ -55,10 +58,12 @@
             <input type="checkbox" id="expenseDivideCheckbox" ng-model="me.expenseData.isDividedUnevenly">
             <label for="">Divide payment unevenly amongst housemates?</label>
         </div>
-
-        <div class="form-group" ng-show="me.expenseData.isDividedUnevenly" ng-repeat="hm in me.houseMates">
-            <label for="">{{hm.firstName}}</label>
-            <input type="text" class="form-control" ng-model="me.unevenTotals[hm.id]">
+        <div ng-show="me.expenseData.isDividedUnevenly">
+            <h6>Leave blank for housemates that don't owe anything</h6>
+            <div class="form-group" ng-repeat="hm in me.houseMates">
+                <label for="">{{hm.firstName}} owes:</label>
+                <input type="text" class="form-control" ng-model="me.unevenTotals[hm.id]">
+            </div>
         </div>
 
         <div class="form-group">
@@ -100,15 +105,24 @@
 
             vm.onCreateExpense = _onCreateExpense;
             vm.onMyExpensesClick = _onMyExpensesClick;
+            vm.onMarkPaidClick = _onMarkPaidClick;
 
 
             render();
             function render() {
-                console.log(vm.user);
-                vm.houseService.get(vm.user.houseId).then(_onGetHouseSuccess, _onGetHouseError);
-                vm.expenseService.getByHouseId(vm.user.houseId).then(_onGetHouseExpensesSuccess, _onGetHouseExpensesError);
+                //console.log(vm.user);
+
+                //this is ok but might be redundant with houseService.getExpenses..
+                // vm.houseService.get(vm.user.houseId).then(onGetHouseByIdSuccess, _onGetHouseByIdError);
+
+                //BAD, REWORK
+                vm.expenseService.getByHouseId(vm.user.houseId).then(_onGetExpenseByHouseIdSuccess, _onGetExpenseByHouseIdError);
+                
+                vm.houseService.getExpenses(vm.user.houseId).then(_onGetHouseExpensesSuccess, _onGetHouseExpensesError);
+                
             }
 
+            // -------------------- form submits ----------------------
             function _onCreateExpense() {
                 console.log(vm.unevenTotals);
                 if (!isCorrectSum(vm.expenseData.total, vm.unevenTotals)) 
@@ -121,6 +135,7 @@
                 vm.expenseService.create(vm.expenseData).then(_onCreateExpenseSuccess, _onCreateExpenseError);
             }
 
+            //--------------- click handlers ---------------------
             function _onMyExpensesClick() {
                 vm.myExpenses = [];
                 for (var i = 0; i < vm.houseExpenses.length; i++) {
@@ -140,6 +155,20 @@
                 console.log(vm.myExpenses);
             }
 
+            function _onMarkPaidClick(expense) {
+
+                console.log(expense);
+                //return;
+
+                if (!expense.isMarkedPaid) {
+                    expense.isMarkedPaid = true;
+                    //BAD, REWORK
+                    vm.expenseService.updateHouseMateExpense(expense.expenseId, expense).then(_onUpdateHouseMateExpenseSuccess, _onUpdateHouseMateExpenseError);
+                }
+
+            }
+
+            // ------------ helper functions ----------------
             function isCorrectSum(total, individualTotalsObj) {
                 var sum = 0;
                 for (var key in individualTotalsObj) {
@@ -151,14 +180,16 @@
             }
 
             //------------------ Ajax responses ----------------------
-            function _onGetHouseSuccess(data) {
-                console.log("house success below");
+
+            //might be redundant... test
+            function onGetHouseByIdSuccess(data) {
+                console.log("Get House by Id house success below");
                 console.log(data);
                 vm.house = data.data;
                 vm.houseMates = data.data.houseMates;
             }
 
-            function _onGetHouseError() {
+            function _onGetHouseByIdError() {
                 console.log("error getting house");
             }
 
@@ -172,20 +203,42 @@
 
             }
 
-            function _onGetHouseExpensesSuccess(response) {
-                console.log("response below");
+            //BAD, REWORK
+            function _onGetExpenseByHouseIdSuccess(response) {
+                console.log("original: get expense by houseId");
                 console.log(response);
                 vm.houseExpenses = response.data;
-                console.log("vm.houseExpenses below");
-                console.log(vm.houseExpenses);
+
+            }
+            //BAD, REWORK
+            function _onGetExpenseByHouseIdError() {
+                console.log("error getting expense by houseId");
+
+            }
+            //BAD, REWORK
+            function _onUpdateHouseMateExpenseSuccess(response) {
+                console.log(response);
+            }
+            //BAD, REWORK
+            function _onUpdateHouseMateExpenseError() {
+                console.log("Error updating HouseMateExpense");
+            }
+
+            function _onGetHouseExpensesSuccess(response) {
+                // console.log("Get House Expenses Success response below");
+                console.log("my houses' expenses");
+                console.log(response);
+                vm.house = response.data;
+                //vm.houseExpenses = response.data.expenses;
+                vm.houseMates = response.data.houseMates;
+                // console.log("vm.houseExpenses below");
+                // console.log(vm.houseExpenses);
 
             }
 
             function _onGetHouseExpensesError() {
                 console.log("error");
-
             }
-
         }
 
      }());

@@ -9,6 +9,7 @@ namespace PunkHouseReal.Services
         House AddHouse(House house);
         List<House> GetAll();
         House GetHouse(int houseId);
+        House GetExpensesByHouse(int houseId);
         void Initialize();
     }
 }

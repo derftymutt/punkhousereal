@@ -13,9 +13,10 @@ using System;
 namespace PunkHouseReal.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180215014455_HouseMateExpense_Add_CreatorId")]
+    partial class HouseMateExpense_Add_CreatorId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

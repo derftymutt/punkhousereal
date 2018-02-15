@@ -13,9 +13,10 @@ using System;
 namespace PunkHouseReal.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180213200538_Add_IsMarkedPaid")]
+    partial class Add_IsMarkedPaid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,8 +200,6 @@ namespace PunkHouseReal.Data.Migrations
                     b.Property<string>("HouseMateId");
 
                     b.Property<int>("ExpenseId");
-
-                    b.Property<string>("CreatorId");
 
                     b.Property<bool>("IsMarkedPaid");
 
