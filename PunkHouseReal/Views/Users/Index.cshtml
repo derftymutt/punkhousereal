@@ -27,10 +27,10 @@
         <button class="btn btn-success" ng-click="me.onMyExpensesClick()">See my Expenses</button>
         <div>
             <ol>
-                <li ng-repeat="expense in me.myExpenses">
-                {{expense.name}}: {{expense.total | currency}}, Due: {{expense.dueDate | date}} <span ng-show="expense.isMarkedPaid">--- <i>marked paid... awaiting received payment confirmation</i> :)</span>
-                    <div ng-show="!expense.isMarkedPaid">
-                        <button class="btn btn-warning" ng-click="me.onMarkPaidClick(expense)">mark paid?</button>
+                <li ng-repeat="hme in me.myExpenses">
+                {{hme.expense.name}}: {{hme.total | currency}}, Due: {{hme.expense.dueDate | date}} <span ng-show="hme.isMarkedPaid">--- <i>marked paid... awaiting received payment confirmation</i> :)</span>
+                    <div ng-show="!hme.isMarkedPaid">
+                        <button class="btn btn-warning" ng-click="me.onMarkPaidClick(hme)">mark paid?</button>
                     </div>
                 </li>
             </ol>
@@ -131,35 +131,17 @@
 
             //--------------- click handlers ---------------------
             function _onMyExpensesClick() {
-
                 vm.houseMateService.getHouseMateExpenses(vm.user.id).then(_onGetHouseMateExpensesSuccess, _onGetHouseMateExpensesError);
-                //BROKEN
-                //ready to be redone with response from above ajax call
-                //vm.myExpenses = [];
-                //for (var i = 0; i < vm.houseExpenses.length; i++) {
-                //    var expense = vm.houseExpenses[i];
-                //    for (var y = 0; y < expense.houseMateExpenses.length; y++) {
-                //        var houseMateExpense = expense.houseMateExpenses[y];
-                //        if (houseMateExpense.houseMateId == vm.user.id) {
-                //            houseMateExpense.creatorId = expense.creatorId;
-                //            houseMateExpense.name = expense.name;
-                //            houseMateExpense.dueDate = expense.dueDate;
-                //            houseMateExpense.expenseType = expense.expenseType;
-                //            vm.myExpenses.push(houseMateExpense);
-                //        }
-                //    }
-                //}
-
                 console.log(vm.myExpenses);
             }
 
             function _onMarkPaidClick(expense) {
 
                 console.log(expense);
-                //return;
 
                 if (!expense.isMarkedPaid) {
                     expense.isMarkedPaid = true;
+                    //FIX ME
                     vm.houseMateExpense.updateHouseMateExpense(vm.userId, expense.expenseId, expense).then(_onUpdateHouseMateExpenseSuccess, _onUpdateHouseMateExpenseError);
                 }
             }
@@ -213,6 +195,7 @@
             function _onGetHouseMateExpensesSuccess(response) {
                 console.log("_onGetHouseMateExpensesSuccess");
                 console.log(response);
+                vm.myExpenses = response.data;
             }
 
             function _onGetHouseMateExpensesError() {
