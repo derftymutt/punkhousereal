@@ -40,16 +40,6 @@ namespace PunkHouseReal.Services
         }
 
         //BAD, REWORK
-        public List<Expense> GetByHouseId(int houseId)
-        {
-            //this returns crazy nested objects... no bueno
-            return _database.Expenses.Include(hme => hme.HouseMateExpenses)
-                                     .Include(hm => hm.HouseMate)
-                                     .Where(hme => hme.HouseMate.HouseId == houseId)
-                                     .ToList();
-        }
-
-        //BAD, REWORK
         public void UpdateHouseMateExpense(HouseMateExpense houseMateExpense)
         {
             _database.HouseMateExpenses.Update(houseMateExpense);

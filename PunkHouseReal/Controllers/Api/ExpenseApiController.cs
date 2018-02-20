@@ -14,7 +14,7 @@ using PunkHouseReal.Services;
 namespace PunkHouseReal.Controllers.Api
 {
     [Produces("application/json")]
-    [Route("api/Expense")]
+    [Route("api/Expenses")]
     [Authorize]
     public class ExpenseApiController : Controller
     {
@@ -51,26 +51,6 @@ namespace PunkHouseReal.Controllers.Api
         }
 
         //BAD, REWORK
-        [HttpGet, Route("{houseId:int}")]
-        public IActionResult Get(int houseId)
-        {
-            if (houseId != 0)
-            {
-                try
-                {
-                   List<Expense> result = _expenseService.GetByHouseId(houseId);
-                   return Ok(result);
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
-            }
-            return BadRequest("Houston we have an error getting the expenses for this house");
-        }
-
-        //BAD, REWORK
         [HttpPatch, Route("{expenseId:int}/HouseMateExpense")]
         public IActionResult EditHouseMateExpense(int expenseId, [FromBody]HouseMateExpenseBindingModel model)
         {
@@ -82,7 +62,7 @@ namespace PunkHouseReal.Controllers.Api
                 try
                 {
                     HouseMateExpense houseMateExpense = new HouseMateExpense();
-                    ParseHouseMateExpenseFields(houseMateExpense, model);
+                   // ParseHouseMateExpenseFields(houseMateExpense, model);
                     _expenseService.UpdateHouseMateExpense(houseMateExpense);
                     return Ok(houseMateExpense);
                 }
@@ -109,13 +89,6 @@ namespace PunkHouseReal.Controllers.Api
             expense.IsPaid = model.IsPaid;
         }
 
-        private void ParseHouseMateExpenseFields(HouseMateExpense houseMateExpense, HouseMateExpenseBindingModel model)
-        {
-            houseMateExpense.ExpenseId = model.ExpenseId;
-            houseMateExpense.HouseMateId = model.HouseMateId;
-            houseMateExpense.IsMarkedPaid = model.IsMarkedPaid;
-            houseMateExpense.IsPaid = model.IsPaid;
-        }
     }
 
 }

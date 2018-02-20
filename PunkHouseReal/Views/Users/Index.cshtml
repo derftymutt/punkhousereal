@@ -1,4 +1,4 @@
-﻿@model PunkHouseReal.Models.ItemViewModel<PunkHouseReal.Domain.HouseMate>;
+﻿@model PunkHouseReal.Models.ItemViewModel<PunkHouseReal.Domain.HouseMate>
 
 @{
     ViewData["Title"] = "Index";
@@ -113,13 +113,13 @@
             function render() {
                 //console.log(vm.user);
                 vm.houseService.getExpenses(vm.user.houseId).then(_onGetHouseExpensesSuccess, _onGetHouseExpensesError);
-                
+
             }
 
             // -------------------- form submits ----------------------
             function _onCreateExpense() {
                 console.log(vm.unevenTotals);
-                if (!isCorrectSum(vm.expenseData.total, vm.unevenTotals)) 
+                if (!isCorrectSum(vm.expenseData.total, vm.unevenTotals))
                     return;
                 //build data object
                 vm.expenseData.creatorId = vm.user.id;
@@ -132,21 +132,23 @@
             //--------------- click handlers ---------------------
             function _onMyExpensesClick() {
 
+                vm.houseMateService.getHouseMateExpenses(vm.user.id).then(_onGetHouseMateExpensesSuccess, _onGetHouseMateExpensesError);
                 //BROKEN
-                vm.myExpenses = [];
-                for (var i = 0; i < vm.houseExpenses.length; i++) {
-                    var expense = vm.houseExpenses[i];
-                    for (var y = 0; y < expense.houseMateExpenses.length; y++) {
-                        var houseMateExpense = expense.houseMateExpenses[y];
-                        if (houseMateExpense.houseMateId == vm.user.id) {
-                            houseMateExpense.creatorId = expense.creatorId;
-                            houseMateExpense.name = expense.name;
-                            houseMateExpense.dueDate = expense.dueDate;
-                            houseMateExpense.expenseType = expense.expenseType;
-                            vm.myExpenses.push(houseMateExpense);
-                        }
-                    }
-                }
+                //ready to be redone with response from above ajax call
+                //vm.myExpenses = [];
+                //for (var i = 0; i < vm.houseExpenses.length; i++) {
+                //    var expense = vm.houseExpenses[i];
+                //    for (var y = 0; y < expense.houseMateExpenses.length; y++) {
+                //        var houseMateExpense = expense.houseMateExpenses[y];
+                //        if (houseMateExpense.houseMateId == vm.user.id) {
+                //            houseMateExpense.creatorId = expense.creatorId;
+                //            houseMateExpense.name = expense.name;
+                //            houseMateExpense.dueDate = expense.dueDate;
+                //            houseMateExpense.expenseType = expense.expenseType;
+                //            vm.myExpenses.push(houseMateExpense);
+                //        }
+                //    }
+                //}
 
                 console.log(vm.myExpenses);
             }
@@ -158,17 +160,15 @@
 
                 if (!expense.isMarkedPaid) {
                     expense.isMarkedPaid = true;
-                    //BAD, REWORK
-                    vm.expenseService.updateHouseMateExpense(expense.expenseId, expense).then(_onUpdateHouseMateExpenseSuccess, _onUpdateHouseMateExpenseError);
+                    vm.houseMateExpense.updateHouseMateExpense(vm.userId, expense.expenseId, expense).then(_onUpdateHouseMateExpenseSuccess, _onUpdateHouseMateExpenseError);
                 }
-
             }
 
             // ------------ helper functions ----------------
             function isCorrectSum(total, individualTotalsObj) {
                 var sum = 0;
                 for (var key in individualTotalsObj) {
-                    var value = individualTotalsObj[key]; 
+                    var value = individualTotalsObj[key];
                     var valueAsInt = parseInt(value)
                     sum += valueAsInt;
                 }
@@ -187,11 +187,11 @@
 
             }
 
-            //BAD, REWORK
             function _onUpdateHouseMateExpenseSuccess(response) {
+                console.log("_onUpdateHouseMateExpenseSuccess");
                 console.log(response);
             }
-            //BAD, REWORK
+
             function _onUpdateHouseMateExpenseError() {
                 console.log("Error updating HouseMateExpense");
             }
@@ -208,6 +208,16 @@
 
             function _onGetHouseExpensesError() {
                 console.log("error");
+            }
+
+            function _onGetHouseMateExpensesSuccess(response) {
+                console.log("_onGetHouseMateExpensesSuccess");
+                console.log(response);
+            }
+
+            function _onGetHouseMateExpensesError() {
+                console.log("error _onGetHouseMateExpensesError");
+
             }
         }
 

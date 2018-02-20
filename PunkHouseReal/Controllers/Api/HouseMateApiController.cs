@@ -15,7 +15,7 @@ using PunkHouseReal.Services;
 namespace PunkHouseReal.Controllers.Api
 {
     [Produces("application/json")]
-    [Route("api/Housemates")]
+    [Route("api/houseMates")]
     public class HouseMateApiController : Controller
     {
         #region properties
@@ -70,6 +70,54 @@ namespace PunkHouseReal.Controllers.Api
 
         }
 
+        //api/houseMates/{id}/expenses
+        [HttpGet, Route("{houseMateId}/expenses")]
+        public IActionResult GetHouseMateExpenses(string houseMateId)
+        {
+            var currentUserId = _userManager.GetUserId(HttpContext.User);
+            if (currentUserId != houseMateId)
+                throw new Exception("HouseMateId does not match current signed in user");
+
+            try
+            {
+                return Ok(_houseMateService.GetHouseMateExpenses(houseMateId));
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        //api/houseMates/{id}/expenses/{id}
+        [HttpPatch, Route("{houseMateId}/expenses/{expenseId:int}")]
+        [Authorize]
+        public IActionResult UpdateHouseMateExpense([FromRoute] string houseMateId, int expenseId, [FromBody]HouseMateExpenseBindingModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                if (houseMateId != model.HouseMateId || expenseId != model.ExpenseId)
+                    throw new Exception("one or more route parameters do not match model values");
+
+                try
+                {
+                    HouseMateExpense houseMateExpense = _houseMateService.GetHouseMateExpense(houseMateId, expenseId);
+                    ParseHouseMateExpenseFields(houseMateExpense, model);
+                    _houseMateService.UpdateHouseMateExpense(houseMateExpense);
+
+                    return Ok(houseMateExpense);
+                }
+                catch (Exception)
+                {
+                    throw new Exception("There was an error updating the HouseMateExpense");
+                }
+
+            }
+
+            return BadRequest("There was an error updating the HouseMateExpense");
+
+        }
+
         #endregion 
         
         #region Private Helper Methods
@@ -83,6 +131,14 @@ namespace PunkHouseReal.Controllers.Api
         private void ParseHouseMateFields(HouseMate houseMate, UpdateHouseMateBindingModel model)
         {
             houseMate.HouseId = model.HouseId;
+        }
+
+        private void ParseHouseMateExpenseFields(HouseMateExpense houseMateExpense, HouseMateExpenseBindingModel model)
+        {
+            houseMateExpense.ExpenseId = model.ExpenseId;
+            houseMateExpense.HouseMateId = model.HouseMateId;
+            houseMateExpense.IsMarkedPaid = model.IsMarkedPaid;
+            houseMateExpense.IsPaid = model.IsPaid;
         }
 
         #endregion

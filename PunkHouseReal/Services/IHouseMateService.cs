@@ -9,5 +9,8 @@ namespace PunkHouseReal.Services
     {
         HouseMate GetHouseMate(string userId);
         Task UpdateHouseMate(HouseMate houseMate);
+        HouseMateExpense GetHouseMateExpense(string houseMateId, int expenseId);
+        List<HouseMateExpense> GetHouseMateExpenses(string houseMateId);
+        void UpdateHouseMateExpense(HouseMateExpense houseMateExpense);
     }
 }

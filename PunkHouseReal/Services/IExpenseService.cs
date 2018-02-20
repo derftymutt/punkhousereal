@@ -8,8 +8,6 @@ namespace PunkHouseReal.Services
     {
         void AddExpense(Expense expense);
         //BAD, REWORK
-        List<Expense> GetByHouseId(int houseId);
-        //BAD, REWORK
         void UpdateHouseMateExpense(HouseMateExpense houseMateExpense);
     }
 }
