@@ -26,12 +26,9 @@ namespace PunkHouseReal.Services
             return _database.HouseMates.FirstOrDefault(housemate => housemate.Id == userId);
         }
 
-        public async Task UpdateHouseId(HouseMate houseMate, int houseId)
+        public async Task UpdateHouseMate(HouseMate houseMate)
         {
-            houseMate.HouseId = houseId;
             await _userManager.UpdateAsync(houseMate);
-
-
         }
     }
 }

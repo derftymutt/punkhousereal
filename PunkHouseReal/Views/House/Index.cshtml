@@ -47,9 +47,10 @@
 
             // ------------ click handlers --------------------
             function _onJoinHouseClick(house) {
-                console.log("im in the Join this house clickhandler");
-                vm.houseMateService.update(house.id).then(_onJoinHouseSuccess, _onJoinHouseError);
-
+                var updateHouseMateData = {
+                    houseId: house.id
+                }
+                vm.houseMateService.update(updateHouseMateData).then(_onJoinHouseSuccess, _onJoinHouseError);
             }
 
             //----------------- ajax responses --------------------

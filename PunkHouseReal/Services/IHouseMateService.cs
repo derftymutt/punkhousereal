@@ -8,6 +8,6 @@ namespace PunkHouseReal.Services
     public interface IHouseMateService
     {
         HouseMate GetHouseMate(string userId);
-        Task UpdateHouseId(HouseMate houseMate, int houseId);
+        Task UpdateHouseMate(HouseMate houseMate);
     }
 }

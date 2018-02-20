@@ -9,21 +9,21 @@
 
         var service = this;
 
-        service.create = function (data) {
-            return $http.post('/api/houses', data);
-        };
-
         service.getAll = function () {
             return $http.get('/api/houses');
         };
 
-        service.get = function (houseId) {
+        service.getById = function (houseId) {
             return $http.get('/api/houses/' + houseId);
         }
 
         service.getExpenses = function (houseId) {
             return $http.get('/api/houses/' + houseId + '/expenses');
         }
+
+        service.create = function (data) {
+            return $http.post('/api/houses', data);
+        };
 
         return service;
     }

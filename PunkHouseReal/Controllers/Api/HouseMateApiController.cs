@@ -9,12 +9,13 @@ using Microsoft.AspNetCore.Mvc;
 using PunkHouseReal.Data;
 using PunkHouseReal.Domain;
 using PunkHouseReal.Models;
+using PunkHouseReal.Models.BindingModels;
 using PunkHouseReal.Services;
 
 namespace PunkHouseReal.Controllers.Api
 {
     [Produces("application/json")]
-    [Route("api/Housemate")]
+    [Route("api/Housemates")]
     public class HouseMateApiController : Controller
     {
         #region properties
@@ -34,7 +35,7 @@ namespace PunkHouseReal.Controllers.Api
 
         #endregion
 
-        #region public methods
+        #region Public Methods
 
         [HttpGet]
         [Authorize]
@@ -43,32 +44,45 @@ namespace PunkHouseReal.Controllers.Api
             return Ok(GetCurrentHouseMate());
         }
 
-        [HttpPut, Route("{houseId:int}")]
+        [HttpPatch, Route("")]
         [Authorize]
-        public async Task<IActionResult> UpdateHouseMate(int houseId)
+        public async Task<IActionResult> UpdateHouseMate([FromBody]UpdateHouseMateBindingModel model)
         {
-            try
+            //This method is currently used to update HouseId when a housemate joins a House 
+            if (ModelState.IsValid)
             {
-                //get current user var currentUserId = _userManager.GetUserId(HttpContext.User);
-                HouseMate houseMate = GetCurrentHouseMate();
+                try
+                {
+                    HouseMate houseMate = GetCurrentHouseMate();
+                    ParseHouseMateFields(houseMate, model);
+                    await _houseMateService.UpdateHouseMate(houseMate);
 
-                //update houseMates HouseId
-                await _houseMateService.UpdateHouseId(houseMate, houseId);
+                    return Ok(houseMate);
 
-                return Ok(houseMate);
-
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            return BadRequest("There was a problem updating the HouseMate");
 
         }
+
+        #endregion 
+        
+        #region Private Helper Methods
 
         private HouseMate GetCurrentHouseMate()
         {
             var currentUserId = _userManager.GetUserId(HttpContext.User);
             return _houseMateService.GetHouseMate(currentUserId);
+        }
+
+        private void ParseHouseMateFields(HouseMate houseMate, UpdateHouseMateBindingModel model)
+        {
+            houseMate.HouseId = model.HouseId;
         }
 
         #endregion

@@ -10,17 +10,14 @@
         var service = this;
 
         service.getHouseMate = function () {
-            return $http.get('/api/housemate');
+            return $http.get('/api/housemates');
         }
 
-        service.update = function (houseId) {
-            return $http.put('/api/housemate/' + houseId);
+        service.update = function (data) {
+            return $http.patch('/api/housemates', data);
         };
 
         return service;
     }
-
-
-
 
 }());

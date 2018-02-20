@@ -94,6 +94,7 @@
 
             var vm = this;
             vm.houseService = houseService;
+            //currently not being used
             vm.houseMateService = houseMateService;
             vm.expenseService = expenseService;
 
@@ -111,13 +112,6 @@
             render();
             function render() {
                 //console.log(vm.user);
-
-                //this is ok but might be redundant with houseService.getExpenses..
-                // vm.houseService.get(vm.user.houseId).then(onGetHouseByIdSuccess, _onGetHouseByIdError);
-
-                //BAD, REWORK
-                vm.expenseService.getByHouseId(vm.user.houseId).then(_onGetExpenseByHouseIdSuccess, _onGetExpenseByHouseIdError);
-                
                 vm.houseService.getExpenses(vm.user.houseId).then(_onGetHouseExpensesSuccess, _onGetHouseExpensesError);
                 
             }
@@ -137,6 +131,8 @@
 
             //--------------- click handlers ---------------------
             function _onMyExpensesClick() {
+
+                //BROKEN
                 vm.myExpenses = [];
                 for (var i = 0; i < vm.houseExpenses.length; i++) {
                     var expense = vm.houseExpenses[i];
@@ -181,18 +177,6 @@
 
             //------------------ Ajax responses ----------------------
 
-            //might be redundant... test
-            function onGetHouseByIdSuccess(data) {
-                console.log("Get House by Id house success below");
-                console.log(data);
-                vm.house = data.data;
-                vm.houseMates = data.data.houseMates;
-            }
-
-            function _onGetHouseByIdError() {
-                console.log("error getting house");
-            }
-
             function _onCreateExpenseSuccess(response) {
                 console.log("Success adding expense!");
                 console.log(response);
@@ -204,18 +188,6 @@
             }
 
             //BAD, REWORK
-            function _onGetExpenseByHouseIdSuccess(response) {
-                console.log("original: get expense by houseId");
-                console.log(response);
-                vm.houseExpenses = response.data;
-
-            }
-            //BAD, REWORK
-            function _onGetExpenseByHouseIdError() {
-                console.log("error getting expense by houseId");
-
-            }
-            //BAD, REWORK
             function _onUpdateHouseMateExpenseSuccess(response) {
                 console.log(response);
             }
@@ -225,14 +197,12 @@
             }
 
             function _onGetHouseExpensesSuccess(response) {
-                // console.log("Get House Expenses Success response below");
                 console.log("my houses' expenses");
                 console.log(response);
+
+                vm.houseExpenses = response.data.expenses;
                 vm.house = response.data;
-                //vm.houseExpenses = response.data.expenses;
                 vm.houseMates = response.data.houseMates;
-                // console.log("vm.houseExpenses below");
-                // console.log(vm.houseExpenses);
 
             }
 
