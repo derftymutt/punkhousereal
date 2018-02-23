@@ -23,7 +23,13 @@ namespace PunkHouseReal.Models.BindingModels
         [Required]
         public decimal Total { get; set; }
         public DateTime DueDate { get; set; }
+        public bool IsMarkedPaid { get; set; }
         public bool IsPaid { get; set; }
+
+        public ExpenseBindingModel()
+        {
+            IsPaid = false;
+        }
 
     }
 }

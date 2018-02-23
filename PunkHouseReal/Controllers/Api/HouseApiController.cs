@@ -16,7 +16,7 @@ using PunkHouseReal.Services;
 namespace PunkHouseReal.Controllers
 {
     [Produces("application/json")]
-    [Route("api/House")]
+    [Route("api/houses")]
     public class HouseApiController : Controller
     {
         #region properties
@@ -51,7 +51,7 @@ namespace PunkHouseReal.Controllers
 
         [HttpGet, Route("{houseId:int}")]
         [Authorize]
-        public IActionResult GetHouse([FromRoute]int houseId)
+        public IActionResult GetHouse(int houseId)
         {
             //get current user
             var currentUserId = _userManager.GetUserId(HttpContext.User);
@@ -61,6 +61,14 @@ namespace PunkHouseReal.Controllers
 
             House house = _houseService.GetHouse(houseId);
             return Ok(house);
+        }
+
+        //"my Houses's Expenses"
+        [HttpGet, Route("{houseId:int}/expenses")]
+        [Authorize]
+        public IActionResult GetExpensesByHouse(int houseId)
+        {
+            return Ok(_houseService.GetExpensesByHouse(houseId));
         }
 
         /// <summary>
@@ -87,10 +95,12 @@ namespace PunkHouseReal.Controllers
                     //first add house to db
                     House house = new House();
                     ParseHouseFields(house, model);
+                    //TODO: I dont need to return thisI don't think... somehow EF/.NET brings the new guy along...
                     House houseAdded = _houseService.AddHouse(house);
 
-                    //Add houseId to houseMate in db
-                    await _houseMateService.UpdateHouseId(houseMate, houseAdded.Id);
+                    //Add houseId to houseMate and save in database
+                    houseMate.HouseId = houseAdded.Id;
+                    await _houseMateService.UpdateHouseMate(houseMate);
 
                     return Ok(houseAdded);
 

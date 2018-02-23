@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PunkHouseReal.Data;
 using PunkHouseReal.Domain;
 using PunkHouseReal.Models;
@@ -26,12 +27,29 @@ namespace PunkHouseReal.Services
             return _database.HouseMates.FirstOrDefault(housemate => housemate.Id == userId);
         }
 
-        public async Task UpdateHouseId(HouseMate houseMate, int houseId)
+        public List<HouseMateExpense> GetHouseMateExpenses(string houseMateId)
         {
-            houseMate.HouseId = houseId;
+            return _database.HouseMateExpenses.Where(hme => hme.HouseMateId == houseMateId)
+                                              .Include(e => e.Expense) 
+                                              .ToList();
+        }
+
+        public HouseMateExpense GetHouseMateExpense(string houseMateId, int expenseId)
+        {
+            return _database.HouseMateExpenses.Where(hme => hme.HouseMateId == houseMateId)
+                                              .Where(hme => hme.ExpenseId == expenseId)
+                                              .FirstOrDefault();
+        }
+
+        public async Task UpdateHouseMate(HouseMate houseMate)
+        {
             await _userManager.UpdateAsync(houseMate);
+        }
 
-
+        public void UpdateHouseMateExpense(HouseMateExpense houseMateExpense)
+        {
+             _database.HouseMateExpenses.Update(houseMateExpense);
+            _database.SaveChanges();
         }
     }
 }

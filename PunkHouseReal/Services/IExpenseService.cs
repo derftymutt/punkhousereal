@@ -7,6 +7,7 @@ namespace PunkHouseReal.Services
     public interface IExpenseService
     {
         void AddExpense(Expense expense);
-        List<Expense> GetByHouseId(int houseId);
+        //BAD, REWORK
+        void UpdateHouseMateExpense(HouseMateExpense houseMateExpense);
     }
 }

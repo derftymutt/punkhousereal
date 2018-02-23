@@ -14,7 +14,7 @@ using PunkHouseReal.Services;
 namespace PunkHouseReal.Controllers.Api
 {
     [Produces("application/json")]
-    [Route("api/Expense")]
+    [Route("api/Expenses")]
     [Authorize]
     public class ExpenseApiController : Controller
     {
@@ -50,15 +50,21 @@ namespace PunkHouseReal.Controllers.Api
             return BadRequest("error creating the expense");
         }
 
-        [HttpGet, Route("{houseId:int}")]
-        public IActionResult Get(int houseId)
+        //BAD, REWORK
+        [HttpPatch, Route("{expenseId:int}/HouseMateExpense")]
+        public IActionResult EditHouseMateExpense(int expenseId, [FromBody]HouseMateExpenseBindingModel model)
         {
-            if (houseId != 0)
+            if (expenseId != model.ExpenseId)
+                return BadRequest("ExpenseId's don't match");
+
+            if (ModelState.IsValid)
             {
                 try
                 {
-                   List<Expense> result = _expenseService.GetByHouseId(houseId);
-                   return Ok(result);
+                    HouseMateExpense houseMateExpense = new HouseMateExpense();
+                   // ParseHouseMateExpenseFields(houseMateExpense, model);
+                    _expenseService.UpdateHouseMateExpense(houseMateExpense);
+                    return Ok(houseMateExpense);
                 }
                 catch (Exception)
                 {
@@ -66,9 +72,9 @@ namespace PunkHouseReal.Controllers.Api
                     throw;
                 }
             }
-            return BadRequest("Houston we have an error getting the expenses for this house");
+            return BadRequest("There was an error updating the HouseMateExpense");
         }
-
+   
         private void ParseExpenseFields(Expense expense, ExpenseBindingModel model)
         {
             expense.CreatorId = model.CreatorId;
@@ -80,7 +86,9 @@ namespace PunkHouseReal.Controllers.Api
             expense.DueDate = model.DueDate;
             expense.IsDividedUnevenly = model.IsDividedUnevenly;
             expense.UnevenTotals = model.UnevenTotals;
+            expense.IsPaid = model.IsPaid;
         }
+
     }
 
 }

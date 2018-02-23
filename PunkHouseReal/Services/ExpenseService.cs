@@ -39,12 +39,11 @@ namespace PunkHouseReal.Services
             _database.SaveChanges();
         }
 
-        public List<Expense> GetByHouseId(int houseId)
+        //BAD, REWORK
+        public void UpdateHouseMateExpense(HouseMateExpense houseMateExpense)
         {
-            return _database.Expenses.Include(hme => hme.HouseMateExpenses)
-                                     .Include(hm => hm.HouseMate)
-                                     .Where(hme => hme.HouseMate.HouseId == houseId)
-                                     .ToList();
+            _database.HouseMateExpenses.Update(houseMateExpense);
+            _database.SaveChanges();
         }
 
         #endregion
@@ -64,6 +63,7 @@ namespace PunkHouseReal.Services
                     {
                         Expense = expense,
                         HouseMateId = item.Key,
+                        CreatorId = expense.CreatorId,
                         Total = item.Value
                     };
 
@@ -84,6 +84,7 @@ namespace PunkHouseReal.Services
                     {
                         Expense = expense,
                         HouseMateId = id,
+                        CreatorId = expense.CreatorId,
                         Total = total
                     };
 

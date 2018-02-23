@@ -18,12 +18,15 @@ namespace PunkHouseReal.Domain
         public int ExpenseId { get; set; }
         public Expense Expense { get; set; }
 
+        public string CreatorId { get; set; }
         public decimal Total { get; set; }
+        public bool IsMarkedPaid { get; set; }
         public bool IsPaid { get; set; }
 
         public HouseMateExpense()
         {
             IsPaid = false;
+            IsMarkedPaid = false;
         }
     }
 }

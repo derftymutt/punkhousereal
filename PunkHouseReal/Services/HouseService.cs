@@ -54,7 +54,14 @@ namespace PunkHouseReal.Services
 
         public House GetHouse(int houseId)
         {
-            return _database.Houses.Include(house => house.HouseMates).First(house => house.Id == houseId);
+            return _database.Houses.Include(house => house.HouseMates).First(house => house.Id == houseId);         
+        }
+
+        public House GetExpensesByHouse(int houseId)
+        {
+            return _database.Houses.Include(house => house.Expenses)
+                                   .Include(house => house.HouseMates)
+                                   .First(house => house.Id == houseId);
         }
 
         public House AddHouse(House house)

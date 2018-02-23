@@ -1,4 +1,4 @@
-﻿@model PunkHouseReal.Models.ItemViewModel<PunkHouseReal.Domain.HouseMate>;
+﻿@model PunkHouseReal.Models.ItemViewModel<PunkHouseReal.Domain.HouseMate>
 
 @{
     ViewData["Title"] = "Index";
@@ -17,7 +17,7 @@
 
     <h4>House Expenses</h4>
     <div ng-repeat="expense in me.houseExpenses">
-        <p> {{$index + 1}}. <b>{{expense.houseMate.firstName}}</b> added: {{expense.name}}: {{expense.description}}. </p>
+        <p> {{$index + 1}}. <b>{{expense.houseMate.firstName}}</b> added: {{expense.name}}: {{expense.description}}. Added: {{expense.dateCreated | date}}</p>
         <p>Total: {{expense.total | currency}}, Due: {{expense.dueDate | date}}. Has everyone paid? - {{expense.isPaid}} </p>
 
     </div>
@@ -27,8 +27,11 @@
         <button class="btn btn-success" ng-click="me.onMyExpensesClick()">See my Expenses</button>
         <div>
             <ol>
-                <li ng-repeat="expense in me.myExpenses">
-                {{expense.name}}: {{expense.total | currency}}, Due: {{expense.dueDate | date}}
+                <li ng-repeat="hme in me.myExpenses">
+                {{hme.expense.name}}: {{hme.total | currency}}, Due: {{hme.expense.dueDate | date}} <span ng-show="hme.isMarkedPaid">--- <i>marked paid... awaiting received payment confirmation</i> :)</span>
+                    <div ng-show="!hme.isMarkedPaid">
+                        <button class="btn btn-warning" ng-click="me.onMarkPaidClick(hme)">mark paid?</button>
+                    </div>
                 </li>
             </ol>
         </div>
@@ -55,10 +58,12 @@
             <input type="checkbox" id="expenseDivideCheckbox" ng-model="me.expenseData.isDividedUnevenly">
             <label for="">Divide payment unevenly amongst housemates?</label>
         </div>
-
-        <div class="form-group" ng-show="me.expenseData.isDividedUnevenly" ng-repeat="hm in me.houseMates">
-            <label for="">{{hm.firstName}}</label>
-            <input type="text" class="form-control" ng-model="me.unevenTotals[hm.id]">
+        <div ng-show="me.expenseData.isDividedUnevenly">
+            <h6>Leave blank for housemates that don't owe anything</h6>
+            <div class="form-group" ng-repeat="hm in me.houseMates">
+                <label for="">{{hm.firstName}} owes:</label>
+                <input type="text" class="form-control" ng-model="me.unevenTotals[hm.id]">
+            </div>
         </div>
 
         <div class="form-group">
@@ -89,6 +94,7 @@
 
             var vm = this;
             vm.houseService = houseService;
+            //currently not being used
             vm.houseMateService = houseMateService;
             vm.expenseService = expenseService;
 
@@ -100,18 +106,20 @@
 
             vm.onCreateExpense = _onCreateExpense;
             vm.onMyExpensesClick = _onMyExpensesClick;
+            vm.onMarkPaidClick = _onMarkPaidClick;
 
 
             render();
             function render() {
-                console.log(vm.user);
-                vm.houseService.get(vm.user.houseId).then(_onGetHouseSuccess, _onGetHouseError);
-                vm.expenseService.getByHouseId(vm.user.houseId).then(_onGetHouseExpensesSuccess, _onGetHouseExpensesError);
+                //console.log(vm.user);
+                vm.houseService.getExpenses(vm.user.houseId).then(_onGetHouseExpensesSuccess, _onGetHouseExpensesError);
+
             }
 
+            // -------------------- form submits ----------------------
             function _onCreateExpense() {
                 console.log(vm.unevenTotals);
-                if (!isCorrectSum(vm.expenseData.total, vm.unevenTotals)) 
+                if (!isCorrectSum(vm.expenseData.total, vm.unevenTotals))
                     return;
                 //build data object
                 vm.expenseData.creatorId = vm.user.id;
@@ -121,29 +129,28 @@
                 vm.expenseService.create(vm.expenseData).then(_onCreateExpenseSuccess, _onCreateExpenseError);
             }
 
+            //--------------- click handlers ---------------------
             function _onMyExpensesClick() {
-                vm.myExpenses = [];
-                for (var i = 0; i < vm.houseExpenses.length; i++) {
-                    var expense = vm.houseExpenses[i];
-                    for (var y = 0; y < expense.houseMateExpenses.length; y++) {
-                        var houseMateExpense = expense.houseMateExpenses[y];
-                        if (houseMateExpense.houseMateId == vm.user.id) {
-                            houseMateExpense.creatorId = expense.creatorId;
-                            houseMateExpense.name = expense.name;
-                            houseMateExpense.dueDate = expense.dueDate;
-                            houseMateExpense.expenseType = expense.expenseType;
-                            vm.myExpenses.push(houseMateExpense);
-                        }
-                    }
-                }
-
+                vm.houseMateService.getHouseMateExpenses(vm.user.id).then(_onGetHouseMateExpensesSuccess, _onGetHouseMateExpensesError);
                 console.log(vm.myExpenses);
             }
 
+            function _onMarkPaidClick(expense) {
+
+                console.log(expense);
+
+                if (!expense.isMarkedPaid) {
+                    expense.isMarkedPaid = true;
+                    //FIX ME
+                    vm.houseMateExpense.updateHouseMateExpense(vm.userId, expense.expenseId, expense).then(_onUpdateHouseMateExpenseSuccess, _onUpdateHouseMateExpenseError);
+                }
+            }
+
+            // ------------ helper functions ----------------
             function isCorrectSum(total, individualTotalsObj) {
                 var sum = 0;
                 for (var key in individualTotalsObj) {
-                    var value = individualTotalsObj[key]; 
+                    var value = individualTotalsObj[key];
                     var valueAsInt = parseInt(value)
                     sum += valueAsInt;
                 }
@@ -151,16 +158,6 @@
             }
 
             //------------------ Ajax responses ----------------------
-            function _onGetHouseSuccess(data) {
-                console.log("house success below");
-                console.log(data);
-                vm.house = data.data;
-                vm.houseMates = data.data.houseMates;
-            }
-
-            function _onGetHouseError() {
-                console.log("error getting house");
-            }
 
             function _onCreateExpenseSuccess(response) {
                 console.log("Success adding expense!");
@@ -172,20 +169,39 @@
 
             }
 
-            function _onGetHouseExpensesSuccess(response) {
-                console.log("response below");
+            function _onUpdateHouseMateExpenseSuccess(response) {
+                console.log("_onUpdateHouseMateExpenseSuccess");
                 console.log(response);
-                vm.houseExpenses = response.data;
-                console.log("vm.houseExpenses below");
-                console.log(vm.houseExpenses);
+            }
+
+            function _onUpdateHouseMateExpenseError() {
+                console.log("Error updating HouseMateExpense");
+            }
+
+            function _onGetHouseExpensesSuccess(response) {
+                console.log("my houses' expenses");
+                console.log(response);
+
+                vm.houseExpenses = response.data.expenses;
+                vm.house = response.data;
+                vm.houseMates = response.data.houseMates;
 
             }
 
             function _onGetHouseExpensesError() {
                 console.log("error");
-
             }
 
+            function _onGetHouseMateExpensesSuccess(response) {
+                console.log("_onGetHouseMateExpensesSuccess");
+                console.log(response);
+                vm.myExpenses = response.data;
+            }
+
+            function _onGetHouseMateExpensesError() {
+                console.log("error _onGetHouseMateExpensesError");
+
+            }
         }
 
      }());

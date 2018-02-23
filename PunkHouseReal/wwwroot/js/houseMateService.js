@@ -9,18 +9,23 @@
 
         var service = this;
 
-        service.getHouseMate = function () {
-            return $http.get('/api/housemate');
+        service.get = function () {
+            return $http.get('/api/housemates');
         }
 
-        service.update = function (houseId) {
-            return $http.put('/api/housemate/' + houseId);
+        service.update = function (data) {
+            return $http.patch('/api/housemates', data);
         };
+
+        service.updateHouseMateExpense = function (houseMateId, expenseId, data) {
+            return $http.put('/api/houseMates/' + houseMateId + '/expenses/' + expenseId, data);
+        }
+
+        service.getHouseMateExpenses = function (houseMateId) {
+            return $http.get('/api/houseMates/' + houseMateId + '/expenses/');
+        }
 
         return service;
     }
-
-
-
 
 }());
