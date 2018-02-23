@@ -39,13 +39,6 @@ namespace PunkHouseReal.Services
             _database.SaveChanges();
         }
 
-        //BAD, REWORK
-        public void UpdateHouseMateExpense(HouseMateExpense houseMateExpense)
-        {
-            _database.HouseMateExpenses.Update(houseMateExpense);
-            _database.SaveChanges();
-        }
-
         #endregion
 
         #region Private Helper Methods

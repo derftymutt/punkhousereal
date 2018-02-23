@@ -27,10 +27,23 @@ namespace PunkHouseReal.Services
             return _database.HouseMates.FirstOrDefault(housemate => housemate.Id == userId);
         }
 
-        public List<HouseMateExpense> GetHouseMateExpenses(string houseMateId)
+        //Expenses I OWE
+        public List<HouseMateExpense> GetHouseMateExpensesIOwe(string houseMateId)
         {
             return _database.HouseMateExpenses.Where(hme => hme.HouseMateId == houseMateId)
+                                            //  .Where(hme => !hme.IsPaid)
                                               .Include(e => e.Expense) 
+                                              .ToList();
+        }
+
+        //Expenses OWED TO ME
+        public List<HouseMateExpense> GetHouseMateExpensesOwedMe(string houseMateId, string creatorId)
+        {
+            return _database.HouseMateExpenses.Where(hme => hme.CreatorId == creatorId)
+                                              .Where(hme => hme.HouseMateId != houseMateId)
+                                             // .Where(hme => !hme.IsPaid)
+                                              .Include(hme => hme.Expense)
+                                              .Include(hme => hme.HouseMate)
                                               .ToList();
         }
 

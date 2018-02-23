@@ -70,17 +70,25 @@ namespace PunkHouseReal.Controllers.Api
 
         }
 
+        //Expenses I owe, if creatorId is passed then it returns expenses I am owed
         //api/houseMates/{id}/expenses
         [HttpGet, Route("{houseMateId}/expenses")]
-        public IActionResult GetHouseMateExpenses(string houseMateId)
+        public IActionResult GetHouseMateExpenses(string houseMateId, string creatorId, bool isExpensesIOwe = true)
         {
             var currentUserId = _userManager.GetUserId(HttpContext.User);
             if (currentUserId != houseMateId)
                 throw new Exception("HouseMateId does not match current signed in user");
 
+            //determine whether to retrieve expenses I owe or expenses owed to me
+            if (!String.IsNullOrEmpty(creatorId))
+                isExpensesIOwe = false;
+
             try
             {
-                return Ok(_houseMateService.GetHouseMateExpenses(houseMateId));
+                if (isExpensesIOwe)
+                    return Ok(_houseMateService.GetHouseMateExpensesIOwe(houseMateId)); //Expenses I owe
+                else
+                    return Ok(_houseMateService.GetHouseMateExpensesOwedMe(houseMateId, creatorId)); //Expenses owed to me
             }
             catch (Exception)
             {

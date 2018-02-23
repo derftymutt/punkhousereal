@@ -18,11 +18,17 @@
         };
 
         service.updateHouseMateExpense = function (houseMateId, expenseId, data) {
-            return $http.put('/api/houseMates/' + houseMateId + '/expenses/' + expenseId, data);
+            return $http.patch('/api/houseMates/' + houseMateId + '/expenses/' + expenseId, data);
         }
 
         service.getHouseMateExpenses = function (houseMateId) {
             return $http.get('/api/houseMates/' + houseMateId + '/expenses/');
+        }
+
+        service.getHouseMateExpensesOwed = function (houseMateId, creatorId) {
+            return $http.get('/api/houseMates/' + houseMateId + '/expenses', {
+                params: {creatorId: creatorId}
+            });
         }
 
         return service;

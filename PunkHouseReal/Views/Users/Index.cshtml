@@ -24,7 +24,7 @@
     <hr />
     <h4>My Expenses</h4>
     <div>
-        <button class="btn btn-success" ng-click="me.onMyExpensesClick()">See my Expenses</button>
+        <button class="btn btn-success" ng-click="me.onMyExpensesClick()">See the Expenses I need to pay!</button>
         <div>
             <ol>
                 <li ng-repeat="hme in me.myExpenses">
@@ -32,6 +32,21 @@
                     <div ng-show="!hme.isMarkedPaid">
                         <button class="btn btn-warning" ng-click="me.onMarkPaidClick(hme)">mark paid?</button>
                     </div>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <hr />
+    <button class="btn btn-success" ng-click="me.onExpensesOwedClick()">See the Expenses motherflowers owe me!</button>
+    <div>
+        <div>
+            <ol>
+                <li ng-repeat="hme in me.expensesOwedMe" ng-hide="hme.isPaid">
+                    {{hme.houseMate.firstName}} owes {{hme.total | currency}} for {{hme.expense.name}}, Due: {{hme.expense.dueDate | date}}
+                    <span ng-show="hme.isMarkedPaid">
+                        this is marked paid! <button class="btn btn-warning" ng-click="me.onConfirmPaidClick(hme)">confirm payment received! </button>
+                    </span>
                 </li>
             </ol>
         </div>
@@ -107,6 +122,8 @@
             vm.onCreateExpense = _onCreateExpense;
             vm.onMyExpensesClick = _onMyExpensesClick;
             vm.onMarkPaidClick = _onMarkPaidClick;
+            vm.onExpensesOwedClick = _onExpensesOwedClick;
+            vm.onConfirmPaidClick = _onConfirmPaidClick;
 
 
             render();
@@ -118,10 +135,15 @@
 
             // -------------------- form submits ----------------------
             function _onCreateExpense() {
-                console.log(vm.unevenTotals);
-                if (!isCorrectSum(vm.expenseData.total, vm.unevenTotals))
+
+                //firat check if expense is divided unevenly, and divided correctly
+                var isDividedEvenly = angular.equals(vm.unevenTotals, {});
+                if (!isDividedEvenly && !isCorrectSum(vm.expenseData.total, vm.unevenTotals)) {
+                    //FIX ME with UI messaging
+                    console.log("Sum is not equal to total expense value");
                     return;
-                //build data object
+                }
+                //then build expense data object
                 vm.expenseData.creatorId = vm.user.id;
                 vm.expenseData.houseId = vm.user.houseId;
                 vm.expenseData.unevenTotals = vm.unevenTotals;
@@ -140,10 +162,22 @@
                 console.log(expense);
 
                 if (!expense.isMarkedPaid) {
+                    //this updates the UI before getting success from the server.... no bueno!
                     expense.isMarkedPaid = true;
-                    //FIX ME
-                    vm.houseMateExpense.updateHouseMateExpense(vm.userId, expense.expenseId, expense).then(_onUpdateHouseMateExpenseSuccess, _onUpdateHouseMateExpenseError);
+                    vm.houseMateService.updateHouseMateExpense(vm.user.id, expense.expenseId, expense).then(_onUpdateHouseMateExpenseSuccess, _onUpdateHouseMateExpenseError);
                 }
+            }
+
+            function _onExpensesOwedClick() {
+                vm.houseMateService.getHouseMateExpensesOwed(vm.user.id, vm.user.id).then(_onGetHouseMateExpensesOwedSuccess, _onGetHouseMateExpensesOwedError);
+
+            }
+
+            function _onConfirmPaidClick(houseMateExpense) {
+                //Updates UI before success from server :/
+                houseMateExpense.isPaid = true;
+                vm.houseMateService.updateHouseMateExpense(houseMateExpense.houseMate.id, houseMateExpense.expenseId, houseMateExpense).then(_onUpdateHouseMateExpenseSuccess, _onUpdateHouseMateExpenseError);
+
             }
 
             // ------------ helper functions ----------------
@@ -200,6 +234,17 @@
 
             function _onGetHouseMateExpensesError() {
                 console.log("error _onGetHouseMateExpensesError");
+
+            }
+
+            function _onGetHouseMateExpensesOwedSuccess(response) {
+                console.log("_onGetHouseMateExpensesOwedSuccess");
+                console.log(response);
+                vm.expensesOwedMe = response.data;
+            }
+
+            function _onGetHouseMateExpensesOwedError() {
+                console.log("error _onGetHouseMateExpensesOwedError ");
 
             }
         }

@@ -13,11 +13,6 @@
             return $http.post('/api/expenses', data);
         };
 
-        //BAD, REWORK
-        service.updateHouseMateExpense = function (houseId, data) {
-            return $http.patch('/api/expenses/' + houseId + '/houseMateExpense', data);
-        };
-
         return service;
     }
 

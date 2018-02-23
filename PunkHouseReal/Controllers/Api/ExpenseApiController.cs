@@ -49,31 +49,6 @@ namespace PunkHouseReal.Controllers.Api
 
             return BadRequest("error creating the expense");
         }
-
-        //BAD, REWORK
-        [HttpPatch, Route("{expenseId:int}/HouseMateExpense")]
-        public IActionResult EditHouseMateExpense(int expenseId, [FromBody]HouseMateExpenseBindingModel model)
-        {
-            if (expenseId != model.ExpenseId)
-                return BadRequest("ExpenseId's don't match");
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    HouseMateExpense houseMateExpense = new HouseMateExpense();
-                   // ParseHouseMateExpenseFields(houseMateExpense, model);
-                    _expenseService.UpdateHouseMateExpense(houseMateExpense);
-                    return Ok(houseMateExpense);
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
-            }
-            return BadRequest("There was an error updating the HouseMateExpense");
-        }
    
         private void ParseExpenseFields(Expense expense, ExpenseBindingModel model)
         {
