@@ -21,13 +21,13 @@
             return $http.patch('/api/houseMates/' + houseMateId + '/expenses/' + expenseId, data);
         }
 
-        service.getHouseMateExpenses = function (houseMateId) {
-            return $http.get('/api/houseMates/' + houseMateId + '/expenses/');
-        }
-
-        service.getHouseMateExpensesOwed = function (houseMateId, creatorId) {
+        service.getHouseMateExpenses = function (houseMateId, data) {
             return $http.get('/api/houseMates/' + houseMateId + '/expenses', {
-                params: {creatorId: creatorId}
+                params: {
+                    creatorId: data.creatorId,
+                    isPaid: data.isPaid,
+                    isMarkedPaid: data.isMarkedPaid
+                }
             });
         }
 

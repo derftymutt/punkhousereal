@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PunkHouseReal.Data;
 using PunkHouseReal.Domain;
 using PunkHouseReal.Models;
+using PunkHouseReal.Models.BindingModels;
 using PunkHouseReal.Services;
 using System;
 using System.Collections.Generic;
@@ -27,24 +28,25 @@ namespace PunkHouseReal.Services
             return _database.HouseMates.FirstOrDefault(housemate => housemate.Id == userId);
         }
 
-        //Expenses I OWE
-        public List<HouseMateExpense> GetHouseMateExpensesIOwe(string houseMateId)
+        public List<HouseMateExpense> GetHouseMateExpenses(string houseMateId, HouseMateExpenseFilterBindingModel model)
         {
-            return _database.HouseMateExpenses.Where(hme => hme.HouseMateId == houseMateId)
-                                            //  .Where(hme => !hme.IsPaid)
-                                              .Include(e => e.Expense) 
-                                              .ToList();
-        }
+            List<HouseMateExpense> result = new List<HouseMateExpense>();
+            //determine what expenses to get
+            if (!String.IsNullOrEmpty(model.CreatorId))
+            {
+                if (model.IsPaid != null && model.IsPaid == false)
+                    result = GetHouseMateExpensesOwedMe(houseMateId, model.CreatorId);
+                else
+                    result = GetHouseMateExpensesOwedMeHistory(houseMateId, model.CreatorId);
+            }
+            else if (model.IsPaid != null && model.IsPaid == false)
+                result = GetHouseMateExpensesIOwe(houseMateId);
+            else
+                result = GetHouseMateExpensesIOweHistory(houseMateId);
 
-        //Expenses OWED TO ME
-        public List<HouseMateExpense> GetHouseMateExpensesOwedMe(string houseMateId, string creatorId)
-        {
-            return _database.HouseMateExpenses.Where(hme => hme.CreatorId == creatorId)
-                                              .Where(hme => hme.HouseMateId != houseMateId)
-                                             // .Where(hme => !hme.IsPaid)
-                                              .Include(hme => hme.Expense)
-                                              .Include(hme => hme.HouseMate)
-                                              .ToList();
+            return result;
+
+
         }
 
         public HouseMateExpense GetHouseMateExpense(string houseMateId, int expenseId)
@@ -64,5 +66,48 @@ namespace PunkHouseReal.Services
              _database.HouseMateExpenses.Update(houseMateExpense);
             _database.SaveChanges();
         }
+
+        #region Private Methods
+
+        //Expenses I OWE
+        private List<HouseMateExpense> GetHouseMateExpensesIOwe(string houseMateId)
+        {
+            return _database.HouseMateExpenses.Where(hme => hme.HouseMateId == houseMateId)
+                                              .Where(hme => !hme.IsPaid)
+                                              .Include(e => e.Expense)
+                                              .ToList();
+        }
+
+        private List<HouseMateExpense> GetHouseMateExpensesIOweHistory(string houseMateId)
+        {
+            return _database.HouseMateExpenses.Where(hme => hme.HouseMateId == houseMateId)
+                                              .Where(hme => hme.IsPaid)
+                                              .Include(e => e.Expense)
+                                              .ToList();
+        }
+
+        //Expenses OWED TO ME
+        private List<HouseMateExpense> GetHouseMateExpensesOwedMe(string houseMateId, string creatorId)
+        {
+            return _database.HouseMateExpenses.Where(hme => hme.CreatorId == creatorId)
+                                              .Where(hme => hme.HouseMateId != houseMateId)
+                                              .Where(hme => !hme.IsPaid)
+                                              .Include(hme => hme.Expense)
+                                              .Include(hme => hme.HouseMate)
+                                              .ToList();
+        }
+
+        //Expenses OWED TO ME history (already paid)
+        private List<HouseMateExpense> GetHouseMateExpensesOwedMeHistory(string houseMateId, string creatorId)
+        {
+            return _database.HouseMateExpenses.Where(hme => hme.CreatorId == creatorId)
+                                              .Where(hme => hme.HouseMateId != houseMateId)
+                                              .Where(hme => hme.IsPaid)
+                                              .Include(hme => hme.Expense)
+                                              .Include(hme => hme.HouseMate)
+                                              .ToList();
+        }
+
+        #endregion
     }
 }

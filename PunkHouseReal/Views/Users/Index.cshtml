@@ -114,7 +114,7 @@
             vm.expenseService = expenseService;
 
             vm.user = @Json.Serialize(Model.Item);
-            vm.expenseTypes = ["Rent", "Bill", "Supply", "Other"];
+            vm.expenseTypes = ["Rent", "Bill", "Supply"]; //PunkHouseReal.Models.EnumsAndConstants.ExpenseType.Bill
             vm.submitExpense = "Submit";
             vm.isDividedUnevenly = false;
             vm.unevenTotals = {};
@@ -153,7 +153,10 @@
 
             //--------------- click handlers ---------------------
             function _onMyExpensesClick() {
-                vm.houseMateService.getHouseMateExpenses(vm.user.id).then(_onGetHouseMateExpensesSuccess, _onGetHouseMateExpensesError);
+                var data = {
+                    isPaid: false
+                };
+                vm.houseMateService.getHouseMateExpenses(vm.user.id, data).then(_onGetHouseMateExpensesSuccess, _onGetHouseMateExpensesError);
                 console.log(vm.myExpenses);
             }
 
@@ -169,7 +172,11 @@
             }
 
             function _onExpensesOwedClick() {
-                vm.houseMateService.getHouseMateExpensesOwed(vm.user.id, vm.user.id).then(_onGetHouseMateExpensesOwedSuccess, _onGetHouseMateExpensesOwedError);
+                var data = {
+                    creatorId: vm.user.id,
+                    isPaid: false
+                }
+                vm.houseMateService.getHouseMateExpenses(vm.user.id, data).then(_onGetHouseMateExpensesOwedSuccess, _onGetHouseMateExpensesOwedError);
 
             }
 
