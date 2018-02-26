@@ -11,13 +11,13 @@ using PunkHouseReal.Services;
 
 namespace PunkHouseReal.Controllers
 {
-    [Route("me"), Authorize]
-    public class UsersController : Controller
+    [Route("myhome"), Authorize]
+    public class MyHomeController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IHouseMateService _houseMateService;
 
-        public UsersController(UserManager<ApplicationUser> userManager, IHouseMateService HouseMateService)
+        public MyHomeController(UserManager<ApplicationUser> userManager, IHouseMateService HouseMateService)
         {
             _userManager = userManager;
             _houseMateService = HouseMateService;
