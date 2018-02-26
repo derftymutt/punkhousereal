@@ -49,6 +49,7 @@ namespace PunkHouseReal.Controllers
             return _houseService.GetAll();
         }
 
+        //api/houses/{id}
         [HttpGet, Route("{houseId:int}")]
         [Authorize]
         public IActionResult GetHouse(int houseId)
@@ -64,6 +65,7 @@ namespace PunkHouseReal.Controllers
         }
 
         //"my Houses's Expenses"
+        //api/houses/{id}/expenses
         [HttpGet, Route("{houseId:int}/expenses")]
         [Authorize]
         public IActionResult GetExpensesByHouse(int houseId)
@@ -76,6 +78,7 @@ namespace PunkHouseReal.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns>House created</returns>
+        //api/houses
         [HttpPost, Route("")]
         [Authorize]
         public async Task<IActionResult> CreateHouse([FromBody]HouseBindingModel model)

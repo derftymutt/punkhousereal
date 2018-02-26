@@ -44,6 +44,7 @@ namespace PunkHouseReal.Controllers.Api
             return Ok(GetCurrentHouseMate());
         }
 
+        //api/housemates
         [HttpPatch, Route("")]
         [Authorize]
         public async Task<IActionResult> UpdateHouseMate([FromBody]UpdateHouseMateBindingModel model)

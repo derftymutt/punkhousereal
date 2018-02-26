@@ -27,6 +27,7 @@ namespace PunkHouseReal.Controllers.Api
             _expenseService = expenseService;
         }
 
+        //api/expenses
         [HttpPost]
         public IActionResult CreateExpense([FromBody]ExpenseBindingModel model)
         {
