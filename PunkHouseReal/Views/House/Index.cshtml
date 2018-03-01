@@ -10,7 +10,7 @@
 
     <a href="/house/create" class="btn button">Add a house</a>
 
-    <div ng-repeat="house in h.houseList">
+    <div ng-repeat="house in h.houses">
         <p>{{house.city}} {{house.state}} -- <span>{{house.name}}, {{house.address1}}, {{house.zip}}</span> </p>
         <button ng-click="h.onJoinHouseClick(house)">Join this house</button>
         <hr />
@@ -33,16 +33,17 @@
         function HouseListController(houseService, houseMateService) {
 
             var vm = this;
-            vm.houseService = houseService;
-            vm.houseMateService = houseMateService;
 
-            //initialize view template functions
+            //click handlers
             vm.onJoinHouseClick = _onJoinHouseClick;
 
-            //on page load
             render();
             function render() {
-                houseService.getAll().then(_onGetHousesSuccess, _onGetHousesError);
+
+                return getAllHouses()
+                    .then(function (data) {
+                        // logger?
+                    });
             }
 
             // ------------ click handlers --------------------
@@ -50,28 +51,30 @@
                 var updateHouseMateData = {
                     houseId: house.id
                 }
-                vm.houseMateService.update(updateHouseMateData).then(_onJoinHouseSuccess, _onJoinHouseError);
+
+                return updateHouseMate(updateHouseMateData)
+                    .then(function (data) {
+                        //logger ?
+                        console.log(data);
+                    });
             }
 
-            //----------------- ajax responses --------------------
-            function _onGetHousesSuccess(result) {
-                vm.houseList = result.data;
-                console.log(vm.houseList);
+            //---------------- service calls ---------------------
+
+            function getAllHouses() {
+                return houseService.getAll()
+                    .then(function (data) {
+                        vm.houses = data;
+                        return vm.houses;
+                    });
             }
 
-            function _onGetHousesError() {
-                console.log("error getting houses");
+            function updateHouseMate(updateData) {
+                return houseMateService.update(updateData)
+                    .then(function (data) {
+                        return data;
+                    });
             }
-
-            function _onJoinHouseSuccess(result) {
-               // vm.houseList = result.data;
-                console.log(result);
-            }
-
-            function _onJoinHouseError() {
-                console.log("error getting houses");
-            }
-
         }
 
     }());

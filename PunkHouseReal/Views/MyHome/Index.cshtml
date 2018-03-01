@@ -10,13 +10,13 @@
     <h1>Hello {{me.user.firstName}} {{me.user.lastName}} of {{me.house.name}}</h1>
 
     <h3>My Housemates are:</h3>
-    <div ng-repeat="hm in me.houseMates">
+    <div ng-repeat="hm in me.house.houseMates">
         <p>{{hm.firstName}} {{hm.lastName}}</p>
     </div>
     <hr />
 
     <h4>House Expenses</h4>
-    <div ng-repeat="expense in me.houseExpenses">
+    <div ng-repeat="expense in me.house.expenses">
         <p> {{$index + 1}}. <b>{{expense.houseMate.firstName}}</b> added: {{expense.name}}: {{expense.description}}. Added: {{expense.dateCreated | date}}</p>
         <p>Total: {{expense.total | currency}}, Due: {{expense.dueDate | date}}. Has everyone paid? - {{expense.isPaid}} </p>
 
@@ -24,7 +24,7 @@
     <hr />
     <h4>My Expenses</h4>
     <div>
-        <button class="btn btn-success" ng-click="me.onMyExpensesClick()">See the Expenses I need to pay!</button>
+        <button class="btn btn-success" ng-click="me.onSeeMyExpensesClick()">See the Expenses I need to pay!</button>
         <div>
             <ol>
                 <li ng-repeat="hme in me.myExpenses">
@@ -108,18 +108,19 @@
         function MeController(houseService, houseMateService, expenseService) {
 
             var vm = this;
-            vm.houseService = houseService;
-            vm.houseMateService = houseMateService;
-            vm.expenseService = expenseService;
 
             vm.user = @Json.Serialize(Model.Item);
             vm.expenseTypes = ["Rent", "Bill", "Supply"]; //PunkHouseReal.Models.EnumsAndConstants.ExpenseType.Bill
             vm.submitExpense = "Submit";
             vm.isDividedUnevenly = false;
             vm.unevenTotals = {};
+            vm.house = [];
+            vm.myExpenses = [];
+            vm.expensesOwedMe = [];
 
+            //click handlers
             vm.onCreateExpense = _onCreateExpense;
-            vm.onMyExpensesClick = _onMyExpensesClick;
+            vm.onSeeMyExpensesClick = _onSeeMyExpensesClick;
             vm.onMarkPaidClick = _onMarkPaidClick;
             vm.onExpensesOwedClick = _onExpensesOwedClick;
             vm.onConfirmPaidClick = _onConfirmPaidClick;
@@ -127,15 +128,15 @@
 
             render();
             function render() {
-                //console.log(vm.user);
-                vm.houseService.getExpenses(vm.user.houseId).then(_onGetHouseExpensesSuccess, _onGetHouseExpensesError);
-
+                return getHouseExpenses().then(function () {
+                    // logger?
+                });
             }
 
             // -------------------- form submits ----------------------
             function _onCreateExpense() {
 
-                //firat check if expense is divided unevenly, and divided correctly
+                //first check if expense is divided unevenly, and divided correctly
                 var isDividedEvenly = angular.equals(vm.unevenTotals, {});
                 if (!isDividedEvenly && !isCorrectSum(vm.expenseData.total, vm.unevenTotals)) {
                     //FIX ME with UI messaging
@@ -147,42 +148,59 @@
                 vm.expenseData.houseId = vm.user.houseId;
                 vm.expenseData.unevenTotals = vm.unevenTotals;
 
-                vm.expenseService.create(vm.expenseData).then(_onCreateExpenseSuccess, _onCreateExpenseError);
+                return createExpense(vm.expenseData).then(function (data) {
+                    // logger?
+                })
             }
 
             //--------------- click handlers ---------------------
-            function _onMyExpensesClick() {
-                var data = {
+            function _onSeeMyExpensesClick() {
+                var filtersData = {
                     isPaid: false
                 };
-                vm.houseMateService.getHouseMateExpenses(vm.user.id, data).then(_onGetHouseMateExpensesSuccess, _onGetHouseMateExpensesError);
-                console.log(vm.myExpenses);
+
+                return getHouseMateExpenses(vm.user.id, filtersData)
+                    .then(function (data) {
+                        //logger?
+                    });
+
             }
 
-            function _onMarkPaidClick(expense) {
+            function _onMarkPaidClick(hme) {
 
-                console.log(expense);
+                console.log(hme);
 
-                if (!expense.isMarkedPaid) {
-                    //this updates the UI before getting success from the server.... no bueno!
-                    expense.isMarkedPaid = true;
-                    vm.houseMateService.updateHouseMateExpense(vm.user.id, expense.expenseId, expense).then(_onUpdateHouseMateExpenseSuccess, _onUpdateHouseMateExpenseError);
+                if (!hme.isMarkedPaid) {
+                    //FIX ME: this updates the UI before getting success from the server.... no bueno!
+                    hme.isMarkedPaid = true;
+
+                    return updateHouseMateExpense(vm.user.id, hme.expenseId, hme)
+                        .then(function (data) {
+                            // logger?
+                        });
                 }
             }
 
             function _onExpensesOwedClick() {
-                var data = {
+                var filtersData = {
                     creatorId: vm.user.id,
                     isPaid: false
                 }
-                vm.houseMateService.getHouseMateExpenses(vm.user.id, data).then(_onGetHouseMateExpensesOwedSuccess, _onGetHouseMateExpensesOwedError);
-
+                
+                return getHouseMateExpensesOwed(vm.user.id, filtersData)
+                    .then(function (data) {
+                        // logger?
+                    });
             }
 
-            function _onConfirmPaidClick(houseMateExpense) {
-                //Updates UI before success from server :/
-                houseMateExpense.isPaid = true;
-                vm.houseMateService.updateHouseMateExpense(houseMateExpense.houseMate.id, houseMateExpense.expenseId, houseMateExpense).then(_onUpdateHouseMateExpenseSuccess, _onUpdateHouseMateExpenseError);
+            function _onConfirmPaidClick(hme) {
+                //FIX ME: Updates UI before success from server :/
+                hme.isPaid = true;
+
+                return updateHouseMateExpense(hme.houseMate.id, hme.expenseId, hme)
+                    .then(function (data) {
+                        //logger?
+                    });
 
             }
 
@@ -197,62 +215,52 @@
                 return total == sum;
             }
 
-            //------------------ Ajax responses ----------------------
+            //--------------- service call functions ---------------
 
-            function _onCreateExpenseSuccess(response) {
-                console.log("Success adding expense!");
-                console.log(response);
+            //houseService
+            function getHouseExpenses() {
+                return houseService.getExpenses(vm.user.houseId)
+                    .then(function (data) {
+                        vm.house = data;
+                        return vm.house;
+                    });
             }
 
-            function _onCreateExpenseError() {
-                console.log("Error creating expense");
-
+            //houseMateService
+            function getHouseMateExpenses(houseMateId, filtersData) {
+                return houseMateService.getHouseMateExpenses(houseMateId, filtersData)
+                    .then(function (data) {
+                        vm.myExpenses = data;
+                        return vm.myExpenses;
+                    });
             }
 
-            function _onUpdateHouseMateExpenseSuccess(response) {
-                console.log("_onUpdateHouseMateExpenseSuccess");
-                console.log(response);
-            }
-
-            function _onUpdateHouseMateExpenseError() {
-                console.log("Error updating HouseMateExpense");
-            }
-
-            function _onGetHouseExpensesSuccess(response) {
-                console.log("my houses' expenses");
-                console.log(response);
-
-                vm.houseExpenses = response.data.expenses;
-                vm.house = response.data;
-                vm.houseMates = response.data.houseMates;
-
-            }
-
-            function _onGetHouseExpensesError() {
-                console.log("error");
-            }
-
-            function _onGetHouseMateExpensesSuccess(response) {
-                console.log("_onGetHouseMateExpensesSuccess");
-                console.log(response);
-                vm.myExpenses = response.data;
-            }
-
-            function _onGetHouseMateExpensesError() {
-                console.log("error _onGetHouseMateExpensesError");
+            //this seems non-DRY.... im making a whole other function to populate a different object returned from a different filter response..
+            function getHouseMateExpensesOwed(houseMateId, filtersData) {
+                return houseMateService.getHouseMateExpenses(houseMateId, filtersData)
+                    .then(function (data) {
+                        vm.expensesOwedMe = data;
+                        return vm.expensesOwedMe;
+                    });
 
             }
 
-            function _onGetHouseMateExpensesOwedSuccess(response) {
-                console.log("_onGetHouseMateExpensesOwedSuccess");
-                console.log(response);
-                vm.expensesOwedMe = response.data;
-            }
-
-            function _onGetHouseMateExpensesOwedError() {
-                console.log("error _onGetHouseMateExpensesOwedError ");
+            function updateHouseMateExpense(houseMateId, houseMateExpenseId, houseMateExpense) {
+                return houseMateService.updateHouseMateExpense(houseMateId, houseMateExpenseId, houseMateExpense)
+                    .then(function (data) {
+                        return data;
+                    });
 
             }
+
+            //expenseService
+            function createExpense(expenseData) {
+                return expenseService.create(expenseData)
+                    .then(function (data) {
+                        return data;
+                    });
+            }
+
         }
 
      }());
