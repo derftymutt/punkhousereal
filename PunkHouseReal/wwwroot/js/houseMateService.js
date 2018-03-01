@@ -3,35 +3,83 @@
 
     angular.module('app').factory('houseMateService', HouseMateService);
 
-    HouseMateService.$inject = ['$http'];
+    HouseMateService.$inject = ['$http', '$q'];
 
-    function HouseMateService($http) {
+    function HouseMateService($http, $q) {
 
-        var service = this;
-
-        service.get = function () {
-            return $http.get('/api/housemates');
+        var service = {
+            get: get,
+            update: update,
+            getHouseMateExpenses: getHouseMateExpenses,
+            updateHouseMateExpense: updateHouseMateExpense
         }
 
-        service.update = function (data) {
-            return $http.patch('/api/housemates', data);
+        return service;
+
+        /////////////////////
+
+        function get () {
+            return $http.get('/api/housemates')
+                .then(onGetHouseMatesSuccess)
+                .catch(onGetHouseMatesError);
+
+            function onGetHouseMatesSuccess(response) {
+                return response.data;
+            }
+
+            function onGetHouseMatesError(error) {
+                return $q.reject("error getting houseMates");
+            }
+        }
+
+        function update(data) {
+            return $http.patch('/api/housemates', data)
+                .then(onUpdateSuccess)
+                .catch(onUpdateError);
+
+            function onUpdateSuccess(response) {
+                return response.data;
+            }
+
+            function onUpdateError(error) {
+                return $q.reject("error updating houseMate");
+            }
         };
 
-        service.updateHouseMateExpense = function (houseMateId, expenseId, data) {
-            return $http.patch('/api/houseMates/' + houseMateId + '/expenses/' + expenseId, data);
+        function updateHouseMateExpense(houseMateId, expenseId, data) {
+            return $http.patch('/api/houseMates/' + houseMateId + '/expenses/' + expenseId, data)
+                .then(onUpdateHouseMateExpenseSuccess)
+                .catch(onUpdateHouseMateExpenseError);
+
+            function onUpdateHouseMateExpenseSuccess(response) {
+                return response.data;
+            }
+
+            function onUpdateHouseMateExpenseError(error) {
+                return $q.reject("error updating hosueMateExpense");
+            }
         }
 
-        service.getHouseMateExpenses = function (houseMateId, data) {
+        function getHouseMateExpenses(houseMateId, data) {
             return $http.get('/api/houseMates/' + houseMateId + '/expenses', {
                 params: {
                     creatorId: data.creatorId,
                     isPaid: data.isPaid,
                     isMarkedPaid: data.isMarkedPaid
                 }
-            });
+            })
+                .then(onGetHouseMateExpensesSuccess)
+                .catch(onGetHouseMateExpensesError);
+
+            function onGetHouseMateExpensesSuccess(response) {
+                return response.data;
+            }
+
+            function onGetHouseMateExpensesError(error) {
+                return $q.reject("error getting houseMateExpenses");
+            }
         }
 
-        return service;
     }
 
 }());
