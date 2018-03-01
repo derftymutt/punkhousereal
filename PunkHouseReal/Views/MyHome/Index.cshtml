@@ -75,7 +75,7 @@
         </div>
         <div ng-show="me.expenseData.isDividedUnevenly">
             <h6>Leave blank for housemates that don't owe anything</h6>
-            <div class="form-group" ng-repeat="hm in me.houseMates">
+            <div class="form-group" ng-repeat="hm in me.house.houseMates">
                 <label for="">{{hm.firstName}} owes:</label>
                 <input type="text" class="form-control" ng-model="me.unevenTotals[hm.id]">
             </div>
@@ -93,9 +93,9 @@
 
 @section Scripts { 
 
-<script src="~/js/houseService.js"></script>
-<script src="~/js/houseMateService.js"></script>
-<script src="~/js/expenseService.js"></script>
+<script src="~/js/app/services/houseService.js"></script>
+<script src="~/js/app/services/houseMateService.js"></script>
+<script src="~/js/app/services/expenseService.js"></script>
 
 <script>
     (function () {

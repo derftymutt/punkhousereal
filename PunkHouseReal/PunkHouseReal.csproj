@@ -5,6 +5,17 @@
     <UserSecretsId>aspnet-PunkHouseReal-5A111F41-368C-4265-B1F4-0DB374719B08</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="wwwroot\lib\NewFolder1\**" />
+    <Compile Remove="wwwroot\NewFolder\**" />
+    <Content Remove="wwwroot\lib\NewFolder1\**" />
+    <Content Remove="wwwroot\NewFolder\**" />
+    <EmbeddedResource Remove="wwwroot\lib\NewFolder1\**" />
+    <EmbeddedResource Remove="wwwroot\NewFolder\**" />
+    <None Remove="wwwroot\lib\NewFolder1\**" />
+    <None Remove="wwwroot\NewFolder\**" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
@@ -19,13 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\lib\NewFolder1\" />
-    <Folder Include="wwwroot\lib\NewFolder\" />
-    <Folder Include="wwwroot\NewFolder\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="wwwroot\js\angular.min.js" />
+    <None Include="wwwroot\lib\angular\angular.min.js" />
   </ItemGroup>
 
 </Project>

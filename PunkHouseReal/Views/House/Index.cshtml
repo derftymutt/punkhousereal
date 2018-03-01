@@ -20,64 +20,64 @@
 
 @section Scripts {
 
-<script src="~/js/houseService.js"></script>
-<script src="~/js/houseMateService.js"></script>
+    <script src="~/js/app/services/houseService.js"></script>
+    <script src="~/js/app/services/houseMateService.js"></script>
 
-<script>
-    (function () {
-        "use strict";
+    <script>
+        (function () {
+            "use strict";
 
-        angular.module("app").controller("houseListController", HouseListController);
-        HouseListController.$inject = ["houseService", "houseMateService"];
+            angular.module("app").controller("houseListController", HouseListController);
+            HouseListController.$inject = ["houseService", "houseMateService"];
 
-        function HouseListController(houseService, houseMateService) {
+            function HouseListController(houseService, houseMateService) {
 
-            var vm = this;
+                var vm = this;
 
-            //click handlers
-            vm.onJoinHouseClick = _onJoinHouseClick;
+                //click handlers
+                vm.onJoinHouseClick = _onJoinHouseClick;
 
-            render();
-            function render() {
+                render();
+                function render() {
 
-                return getAllHouses()
-                    .then(function (data) {
-                        // logger?
-                    });
-            }
-
-            // ------------ click handlers --------------------
-            function _onJoinHouseClick(house) {
-                var updateHouseMateData = {
-                    houseId: house.id
+                    return getAllHouses()
+                        .then(function (data) {
+                            // logger?
+                        });
                 }
 
-                return updateHouseMate(updateHouseMateData)
-                    .then(function (data) {
-                        //logger ?
-                        console.log(data);
-                    });
+                // ------------ click handlers --------------------
+                function _onJoinHouseClick(house) {
+                    var updateHouseMateData = {
+                        houseId: house.id
+                    }
+
+                    return updateHouseMate(updateHouseMateData)
+                        .then(function (data) {
+                            //logger ?
+                            console.log(data);
+                        });
+                }
+
+                //---------------- service calls ---------------------
+
+                function getAllHouses() {
+                    return houseService.getAll()
+                        .then(function (data) {
+                            vm.houses = data;
+                            return vm.houses;
+                        });
+                }
+
+                function updateHouseMate(updateData) {
+                    return houseMateService.update(updateData)
+                        .then(function (data) {
+                            return data;
+                        });
+                }
             }
 
-            //---------------- service calls ---------------------
-
-            function getAllHouses() {
-                return houseService.getAll()
-                    .then(function (data) {
-                        vm.houses = data;
-                        return vm.houses;
-                    });
-            }
-
-            function updateHouseMate(updateData) {
-                return houseMateService.update(updateData)
-                    .then(function (data) {
-                        return data;
-                    });
-            }
-        }
-
-    }());
-</script>
+        }());
+    </script>
 
 }

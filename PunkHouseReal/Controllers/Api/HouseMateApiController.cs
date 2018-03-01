@@ -55,6 +55,12 @@ namespace PunkHouseReal.Controllers.Api
                 try
                 {
                     HouseMate houseMate = GetCurrentHouseMate();
+
+                    if (houseMate.HouseId != 0)
+                    {
+                        throw new Exception("houseMate already is a member of a house");
+                    }
+
                     ParseHouseMateFields(houseMate, model);
                     await _houseMateService.UpdateHouseMate(houseMate);
 
