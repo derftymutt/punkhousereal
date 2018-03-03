@@ -1,15 +1,90 @@
-﻿body {
+﻿
+/* CSS RESET*/
+html, body, div, span, p,
+a, img, ol, ul, li, form,
+footer, header, nav {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    text-decoration: none;
+    font-family: Lalo, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+footer, header, nav {
+    display: block;
+}
+
+body {
+    line-height: 1;
+    background: linear-gradient(-90deg, red, yellow);
+}
+
+ol, ul {
+    list-style: none;
+}
+
+/*RESET END*/
+
+/* HEADER */
+
+.navbar-header-title{
+    padding-left: 150px;
+}
+
+.header-container-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2a1c82;
+    padding: 20px 10px;
+}
+
+.navbar-header-nav {
+    display: inline;
+    padding-right: 150px;
+}
+
+.navbar-header-nav ul li{
+    display: inline-block;
+}
+
+.navbar-header-nav ul li a {
+    color: #fff;
+}
+
+.navbar-brand {
+    font-size: 36px;
+    color: #fff;
+}
+
+/* HEADER END */
+
+/* FOOTER */
+
+footer {
+    display: flex;
+    align-items: center;
+    padding: 20px 10px;
+    background-color:mediumpurple;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+/* FOOTER END */
+
+/*body {
     padding-top: 50px;
     padding-bottom: 20px;
-}
-
+}*/
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
-.body-content {
+/*.body-content {
     padding-left: 15px;
     padding-right: 15px;
-}
-
+}*/
 /* Carousel */
 .carousel-caption p {
     font-size: 20px;
